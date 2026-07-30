@@ -1,0 +1,23 @@
+{
+  "type": "bingo:action",
+  "level": 4,
+  "target": {
+    "trigger": "bingo:reach_xp_level",
+    "params": {
+      "level": 30
+    }
+  },
+  "weight": 7,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:experience_bottle",
+    "name": {
+      "translate": "bingo.obj.action.level_30"
+    },
+    "description": {
+      "translate": "bingo.obj.action.level_30.desc"
+    }
+  }
+}

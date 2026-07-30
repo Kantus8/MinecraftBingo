@@ -226,8 +226,14 @@ Variante raccourcie adossée aux advancements vanilla (aucun code à écrire) :
 | `bingo:tame_animal` | `entity_type` | `EntityType` + mixin `TameableEntity#setOwner` |
 | `bingo:reach_y_level` | `y`, `comparator` (`"below"`/`"above"`) | tick joueur, throttle 20 ticks |
 | `bingo:use_item_on_block` | `item`, `block` | `UseBlockCallback` |
+| `bingo:reach_xp_level` | `level` (**obligatoire**) | tick joueur, throttle 20 ticks |
+| `bingo:ride_equipped_horse` | `armor` (opt.), `exclude` (opt., liste d'items) | tick joueur, throttle 20 ticks |
 
 `bingo:advancement` couvre à lui seul une centaine d'objectifs potentiels sans une ligne de Java. **Le privilégier systématiquement** — n'écrire un trigger dédié que si aucun advancement ne correspond.
+
+**Piège du joker** : `matchesId` traite un paramètre absent comme « n'importe quelle valeur ». Un `bingo:advancement` sans `params.advancement` matche donc le **premier advancement obtenu**, y compris « Taking Inventory » — la case se coche dans les premières secondes. Seuls `bingo:reach_y_level` et `bingo:reach_xp_level` exigent leur paramètre, précisément parce qu'un seuil absent vaudrait zéro.
+
+Aucun de ces identifiants vanilla n'est validé au chargement : un `advancement`, un `damage_type` ou une `requires_dimension` inexistants ne lèvent rien, ils ne matchent simplement jamais. Les vérifier contre le jar du cache Loom avant de committer.
 
 | Niveau | Exemple |
 |---|---|
@@ -294,9 +300,9 @@ Résolution : `entries` ∪ (objectifs matchant `include_tags`) ∪ (pools de `i
 | Profil | N1 | N2 | N3 | N4 | N5 | Somme | Score max théorique* |
 |---|---|---|---|---|---|---|---|
 | `easy` | 15 | 10 | 0 | 0 | 0 | 25 | 3 500 |
-| `normal` | 9 | 10 | 6 | 0 | 0 | 25 | 5 300 |
-| `hard` | 3 | 10 | 9 | 3 | 0 | 25 | 8 300 |
-| `extreme` | 0 | 6 | 7 | 9 | 3 | 25 | 16 000 |
+| `normal` | 8 | 9 | 8 | 0 | 0 | 25 | 5 800 |
+| `hard` | 2 | 10 | 9 | 4 | 0 | 25 | 9 000 |
+| `extreme` | 0 | 7 | 9 | 6 | 3 | 25 | 14 600 |
 
 \* Somme de `100 × 2^(level-1)` sur les 25 cases. Sert au calibrage relatif, pas à un objectif de jeu (personne ne complète 25 cases).
 

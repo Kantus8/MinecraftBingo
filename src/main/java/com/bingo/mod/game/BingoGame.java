@@ -735,7 +735,7 @@ public final class BingoGame {
 			ObjectiveValidator.scanInventories(this);
 		}
 		if (server.getTicks() % 20 == 0) {
-			ObjectiveValidator.scanPositions(this);
+			ObjectiveValidator.scanPeriodicActions(this);
 		}
 	}
 

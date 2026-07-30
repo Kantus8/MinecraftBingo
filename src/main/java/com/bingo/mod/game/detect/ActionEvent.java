@@ -90,4 +90,26 @@ public sealed interface ActionEvent {
 			return ActionTriggers.USE_ITEM_ON_BLOCK;
 		}
 	}
+
+	/** Niveau d'expérience du joueur, échantillonné périodiquement. */
+	record XpLevelReached(int level) implements ActionEvent {
+		@Override
+		public Identifier trigger() {
+			return ActionTriggers.REACH_XP_LEVEL;
+		}
+	}
+
+	/**
+	 * Le joueur chevauche un cheval apprivoisé, sellé <em>et</em> harnaché.
+	 *
+	 * <p>{@code armor} porte l'armure effectivement équipée : c'est la seule information qui
+	 * permette à un objectif de distinguer les paliers, le cuir n'ayant pas la même valeur qu'un
+	 * harnachement en diamant.
+	 */
+	record RodeEquippedHorse(Identifier armor) implements ActionEvent {
+		@Override
+		public Identifier trigger() {
+			return ActionTriggers.RIDE_EQUIPPED_HORSE;
+		}
+	}
 }

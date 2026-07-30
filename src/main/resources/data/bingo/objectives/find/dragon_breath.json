@@ -1,0 +1,25 @@
+{
+  "type": "bingo:action",
+  "level": 5,
+  "target": {
+    "trigger": "bingo:advancement",
+    "params": {
+      "advancement": "minecraft:end/dragon_breath"
+    }
+  },
+  "weight": 1,
+  "tags": [
+    "bingo:boss",
+    "bingo:end"
+  ],
+  "requires_dimension": "minecraft:the_end",
+  "display": {
+    "icon": "minecraft:dragon_breath",
+    "name": {
+      "translate": "bingo.obj.find.dragon_breath"
+    },
+    "description": {
+      "translate": "bingo.obj.find.dragon_breath.desc"
+    }
+  }
+}

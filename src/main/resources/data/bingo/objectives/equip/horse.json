@@ -1,0 +1,25 @@
+{
+  "type": "bingo:action",
+  "level": 4,
+  "target": {
+    "trigger": "bingo:ride_equipped_horse",
+    "params": {
+      "exclude": [
+        "minecraft:leather_horse_armor"
+      ]
+    }
+  },
+  "weight": 5,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:saddle",
+    "name": {
+      "translate": "bingo.obj.equip.horse"
+    },
+    "description": {
+      "translate": "bingo.obj.equip.horse.desc"
+    }
+  }
+}

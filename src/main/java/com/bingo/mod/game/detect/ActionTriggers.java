@@ -4,6 +4,8 @@ import com.bingo.mod.objective.Objective;
 import com.bingo.mod.objective.type.ActionTarget;
 import com.bingo.mod.util.BingoConstants;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Identifier;
 
 import java.util.Collection;
@@ -36,11 +38,16 @@ public final class ActionTriggers {
 	public static final Identifier TAME_ANIMAL = BingoConstants.id("tame_animal");
 	public static final Identifier REACH_Y_LEVEL = BingoConstants.id("reach_y_level");
 	public static final Identifier USE_ITEM_ON_BLOCK = BingoConstants.id("use_item_on_block");
+	public static final Identifier REACH_XP_LEVEL = BingoConstants.id("reach_xp_level");
+	public static final Identifier RIDE_EQUIPPED_HORSE = BingoConstants.id("ride_equipped_horse");
 
 	private static final Map<Identifier, ActionTrigger> REGISTRY = buildRegistry();
 
 	/** Déclencheurs inconnus déjà signalés — un WARN par identifiant, pas un par rechargement. */
 	private static final Set<Identifier> REPORTED_UNKNOWN = new HashSet<>();
+
+	/** Voir {@link #reportBadExclude()} : le WARN ne doit pas se répéter à chaque tick. */
+	private static boolean badExcludeReported;
 
 	private ActionTriggers() {
 	}
@@ -101,6 +108,35 @@ public final class ActionTriggers {
 			return matchesId(params, "item", used.item()) && matchesId(params, "block", used.block());
 		});
 
+		// 'level' est exigé, contrairement au joker habituel : un seuil absent voudrait dire
+		// « n'importe quel niveau », donc validation au niveau 0, donc au premier échantillon.
+		registry.put(REACH_XP_LEVEL, (event, params) -> {
+			if (!(event instanceof ActionEvent.XpLevelReached reached) || !params.contains("level")) {
+				return false;
+			}
+			return reached.level() >= params.getInt("level");
+		});
+
+		registry.put(RIDE_EQUIPPED_HORSE, (event, params) -> {
+			if (!(event instanceof ActionEvent.RodeEquippedHorse ridden)
+					|| !matchesId(params, "armor", ridden.armor())) {
+				return false;
+			}
+			// Une liste 'exclude' plutôt qu'un tag d'items : la seule exclusion utile aujourd'hui est
+			// le cuir, et un tag imposerait un fichier généré pour une liste d'un seul élément.
+			NbtList excluded = params.getList("exclude", NbtElement.STRING_TYPE);
+
+			// getList rend une liste vide en cas de type inattendu, sans lever : un 'exclude' déclaré
+			// mais illisible validerait alors le cuir en silence. On préfère le dire.
+			if (params.contains("exclude") && excluded.isEmpty()) {
+				reportBadExclude();
+				return false;
+			}
+
+			String armor = ridden.armor().toString();
+			return excluded.stream().noneMatch(entry -> armor.equals(entry.asString()));
+		});
+
 		return Map.copyOf(registry);
 	}
 
@@ -110,6 +146,16 @@ public final class ActionTriggers {
 	 * <p>Clé absente = pas de contrainte : c'est ce qui rend {@code "params": {}} équivalent à
 	 * « n'importe lequel », la forme utilisée par plusieurs objectifs livrés.
 	 */
+	/** Un WARN une seule fois : ce test tombe à chaque échantillonnage, soit une fois par seconde. */
+	private static void reportBadExclude() {
+		if (badExcludeReported) {
+			return;
+		}
+		badExcludeReported = true;
+		BingoConstants.LOGGER.warn("Paramètre 'exclude' de '{}' illisible : une liste de chaînes"
+				+ " est attendue, ex. [\"minecraft:leather_horse_armor\"]", RIDE_EQUIPPED_HORSE);
+	}
+
 	private static boolean matchesId(NbtCompound params, String key, Identifier actual) {
 		Optional<Identifier> wanted = readId(params, key);
 		return wanted.isEmpty() || wanted.get().equals(actual);

@@ -15,7 +15,9 @@ import com.bingo.mod.util.BingoConstants;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
+import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
@@ -321,20 +323,37 @@ public final class ObjectiveValidator {
 		}
 	}
 
-	// ── ACTION périodique : altitude (`docs/01` §4.5) ──────────────────────────
+	// ── ACTION périodique : altitude, expérience, monture (`docs/01` §4.5) ─────
 
 	/**
-	 * Échantillonne l'altitude des joueurs, toutes les 20 ticks.
+	 * Échantillonne l'état continu des joueurs, toutes les 20 ticks.
 	 *
 	 * <p>Séparé du scan d'inventaire parce que le seuil de throttle diffère (20 ticks contre 10) et
-	 * qu'un joueur ne franchit pas Y=-59 deux fois par seconde.
+	 * qu'aucune de ces grandeurs ne change deux fois par seconde.
+	 *
+	 * <p>Limite assumée de l'échantillonnage : un seuil franchi puis reperdu en moins d'une seconde
+	 * passe inaperçu. C'était déjà vrai de l'altitude, et un joueur qui atteint le niveau 30 pour le
+	 * dépenser dans la même seconde n'a pas vraiment « tenu » l'objectif. Un hook sur chaque gain
+	 * d'XP coûterait un test par orbe ramassé pour ce seul cas limite.
 	 */
-	public static void scanPositions(BingoGame game) {
+	public static void scanPeriodicActions(BingoGame game) {
 		for (ServerPlayerEntity player : game.server().getPlayerManager().getPlayerList()) {
 			if (game.phase() != GamePhase.RUNNING) {
 				return;
 			}
 			onAction(player, new ActionEvent.YLevelReached(player.getY()));
+			onAction(player, new ActionEvent.XpLevelReached(player.experienceLevel));
+
+			// HorseEntity et non AbstractHorseEntity : ânes et mulets portent un coffre, pas une
+			// armure, et getArmorType() n'existe que sur le cheval.
+			if (player.getVehicle() instanceof HorseEntity horse
+					&& horse.isTame() && horse.isSaddled()) {
+				ItemStack armor = horse.getArmorType();
+				if (!armor.isEmpty()) {
+					onAction(player, new ActionEvent.RodeEquippedHorse(
+							Registries.ITEM.getId(armor.getItem())));
+				}
+			}
 		}
 	}
 

@@ -1,0 +1,23 @@
+{
+  "type": "bingo:action",
+  "level": 4,
+  "target": {
+    "trigger": "bingo:advancement",
+    "params": {
+      "advancement": "minecraft:adventure/totem_of_undying"
+    }
+  },
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky"
+  ],
+  "display": {
+    "icon": "minecraft:totem_of_undying",
+    "name": {
+      "translate": "bingo.obj.adventure.totem_of_undying"
+    },
+    "description": {
+      "translate": "bingo.obj.adventure.totem_of_undying.desc"
+    }
+  }
+}

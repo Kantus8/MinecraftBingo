@@ -1,0 +1,23 @@
+{
+  "type": "bingo:action",
+  "level": 5,
+  "target": {
+    "trigger": "bingo:advancement",
+    "params": {
+      "advancement": "minecraft:story/cure_zombie_villager"
+    }
+  },
+  "weight": 5,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:splash_potion",
+    "name": {
+      "translate": "bingo.obj.heal.zombie_villager"
+    },
+    "description": {
+      "translate": "bingo.obj.heal.zombie_villager.desc"
+    }
+  }
+}

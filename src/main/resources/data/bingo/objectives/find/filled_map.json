@@ -1,0 +1,20 @@
+{
+  "type": "bingo:find",
+  "level": 3,
+  "target": {
+    "item": "minecraft:filled_map"
+  },
+  "weight": 4,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:filled_map",
+    "name": {
+      "translate": "bingo.obj.find.filled_map"
+    },
+    "description": {
+      "translate": "bingo.obj.find.filled_map.desc"
+    }
+  }
+}
