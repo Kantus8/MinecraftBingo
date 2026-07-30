@@ -106,7 +106,7 @@ partent sur JEI, les autres sur tooltip.
 {
   "display_name": { "translate": "bingo.difficulty.normal" },
   "pool": "bingo:default",
-  "distribution": { "1": 9, "2": 10, "3": 6, "4": 0, "5": 0 },
+  "distribution": { "1": 8, "2": 9, "3": 8, "4": 0, "5": 0 },
   "time_limit_seconds": 3600,
   "ruleset": "bingo:classic"
 }
@@ -115,6 +115,32 @@ partent sur JEI, les autres sur tooltip.
 `distribution` doit totaliser 25. Si le pool ne peut pas fournir la répartition demandée,
 `BoardGenerator` rend un tirage incomplet : `BingoGame.start` refuse alors avec `EMPTY_BOARD` et remonte
 les avertissements à l'opérateur plutôt que de démarrer une manche injouable.
+
+### Niveau cible par ligne — la contrainte qui pilote les distributions
+
+Chaque ligne et chaque colonne doit cumuler le même niveau à ±1 près (`BoardGenerator.LINE_TOLERANCE`).
+La cible est **dérivée**, jamais déclarée : `Σ(niveau × compte) / 5`. Les 5 lignes couvrent les 25 cases,
+donc une cible posée dans le JSON serait fausse dès que la distribution ne totalise pas cinq fois cette
+cible.
+
+Conséquence : **modifier une `distribution` déplace la difficulté visée.** Les 4 profils livrés visent
+7 / 10 / 13 / 16, soit des totaux de 35 / 50 / 65 / 80.
+
+| Profil | Distribution | Total | Cible/ligne |
+|---|---|---|---|
+| easy | 15·N1 10·N2 | 35 | 7 |
+| normal | 8·N1 9·N2 8·N3 | 50 | 10 |
+| hard | 2·N1 10·N2 9·N3 4·N4 | 65 | 13 |
+| extreme | 7·N2 9·N3 6·N4 3·N5 | 80 | 16 |
+
+Le placement est fait par recherche locale (échanges de deux cases) dans la section « Équilibrage » de
+`BoardGenerator` — donc sans jamais toucher à la distribution. Si la bande ±1 n'est pas atteignable, le
+tirage passe quand même avec un avertissement : une grille un peu déséquilibrée reste jouable.
+`/bingo debug dump <difficulté>` affiche les sommes par ligne, par colonne et par diagonale.
+
+Les **diagonales ne sont pas contraintes**, seulement mesurées : ce sont pourtant 2 des 12 chemins de
+victoire. Les forcer dans la bande ajouterait deux équations à un système qui n'a déjà pas toujours de
+solution.
 
 ## Un ruleset
 

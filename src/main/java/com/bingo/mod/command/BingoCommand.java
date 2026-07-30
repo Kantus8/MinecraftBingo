@@ -957,21 +957,33 @@ public final class BingoCommand {
 
 		// La grille en chat ne montre que les niveaux : 25 noms d'objectifs y seraient illisibles.
 		// Le détail complet part dans le log, où il est consultable ligne par ligne.
+		int[] rowSums = draw.lineSums(Ruleset.WinCondition.LINE);
 		for (int row = 0; row < BingoBoard.SIZE; row++) {
 			StringBuilder line = new StringBuilder();
 			for (int col = 0; col < BingoBoard.SIZE; col++) {
 				int index = BingoBoard.index(row, col);
 				line.append(index < draw.tiles().size() ? draw.tiles().get(index).level() : "·").append(' ');
 			}
-			String rendered = line.toString();
+			String rendered = line + " = " + rowSums[row];
 			source.sendFeedback(() -> Text.literal("  " + rendered).formatted(Formatting.AQUA), false);
 		}
+
+		// C'est le seul endroit où l'équilibrage des lignes se vérifie d'un coup d'œil, sans lancer
+		// de manche. Les diagonales sont affichées bien qu'elles ne soient pas contraintes : voir de
+		// combien elles s'écartent renseigne sur ce que l'égalisation lignes/colonnes laisse passer.
+		source.sendFeedback(() -> Text.translatable("bingo.command.debug.dump.columns",
+				formatSums(draw.lineSums(Ruleset.WinCondition.COLUMN))).formatted(Formatting.AQUA), false);
+		source.sendFeedback(() -> Text.translatable("bingo.command.debug.dump.balance",
+						String.valueOf(draw.lineTarget()),
+						String.valueOf(BoardGenerator.LINE_TOLERANCE),
+						formatSums(draw.lineSums(Ruleset.WinCondition.DIAGONAL)))
+				.formatted(draw.isBalanced() ? Formatting.GREEN : Formatting.YELLOW), false);
 
 		draw.warnings().forEach(warning ->
 				source.sendFeedback(() -> Text.literal("⚠ " + warning).formatted(Formatting.YELLOW), false));
 
-		BingoConstants.LOGGER.info("Tirage d'essai '{}' (graine {}) — distribution {} :", id, seed,
-				draw.actualDistribution());
+		BingoConstants.LOGGER.info("Tirage d'essai '{}' (graine {}) — distribution {}, cible par ligne {} :",
+				id, seed, draw.actualDistribution(), draw.lineTarget());
 		for (int index = 0; index < draw.tiles().size(); index++) {
 			Objective objective = draw.tiles().get(index);
 			BingoConstants.LOGGER.info("  [{},{}] N{} {} ({})",
@@ -1036,6 +1048,12 @@ public final class BingoCommand {
 			normalized.put(level, distribution.getOrDefault(level, 0));
 		}
 		return normalized;
+	}
+
+	private static String formatSums(int[] sums) {
+		return IntStream.of(sums)
+				.mapToObj(String::valueOf)
+				.collect(Collectors.joining("  ·  "));
 	}
 
 	private static String formatDistribution(Map<Integer, Integer> distribution) {

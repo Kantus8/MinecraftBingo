@@ -193,6 +193,8 @@
   "bingo.command.debug.dump.header": "── Tirage d'essai · %1$s · graine %2$s ──",
   "bingo.command.debug.dump.requested": "Demandé : %s",
   "bingo.command.debug.dump.obtained": "Obtenu  : %s",
+  "bingo.command.debug.dump.columns": "Colonnes :  %s",
+  "bingo.command.debug.dump.balance": "Niveau cible par ligne %1$s ±%2$s  ·  diagonales %3$s",
   "bingo.command.debug.dump.logged": "Détail case par case écrit dans le log du serveur.",
   "bingo.command.reload.failed": "Rechargement échoué — voir le log du serveur.",
   "bingo.command.debug.objectives.header": "── Objectifs · révision %s ──",

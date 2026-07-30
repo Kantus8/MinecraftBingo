@@ -5,9 +5,9 @@
   "pool": "bingo:default",
   "distribution": {
     "1": 0,
-    "2": 6,
-    "3": 7,
-    "4": 9,
+    "2": 7,
+    "3": 9,
+    "4": 6,
     "5": 3
   },
   "time_limit_seconds": 7200,

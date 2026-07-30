@@ -193,6 +193,8 @@
   "bingo.command.debug.dump.header": "── Test draw · %1$s · seed %2$s ──",
   "bingo.command.debug.dump.requested": "Requested: %s",
   "bingo.command.debug.dump.obtained": "Obtained:  %s",
+  "bingo.command.debug.dump.columns": "Columns:   %s",
+  "bingo.command.debug.dump.balance": "Line target %1$s ±%2$s  ·  diagonals %3$s",
   "bingo.command.debug.dump.logged": "Tile-by-tile detail written to the server log.",
   "bingo.command.reload.failed": "Reload failed — see the server log.",
   "bingo.command.debug.objectives.header": "── Objectives · revision %s ──",
