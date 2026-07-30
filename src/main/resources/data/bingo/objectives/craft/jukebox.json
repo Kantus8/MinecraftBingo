@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:jukebox"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:jukebox",
+    "name": {
+      "translate": "bingo.obj.craft.jukebox"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.jukebox.desc"
+    }
+  }
+}

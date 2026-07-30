@@ -1,6 +1,6 @@
 {
   "type": "bingo:death",
-  "level": 2,
+  "level": 1,
   "target": {
     "damage_type": "minecraft:drown"
   },

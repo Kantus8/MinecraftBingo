@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 3,
+  "target": {
+    "item": "minecraft:cake"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:cake",
+    "name": {
+      "translate": "bingo.obj.craft.cake"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.cake.desc"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 {
   "type": "bingo:kill_mob",
-  "level": 3,
+  "level": 4,
   "target": {
     "entity_type": "minecraft:blaze"
   },

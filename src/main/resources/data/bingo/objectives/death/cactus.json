@@ -1,6 +1,6 @@
 {
   "type": "bingo:death",
-  "level": 1,
+  "level": 2,
   "target": {
     "damage_type": "minecraft:cactus"
   },

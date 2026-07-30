@@ -1,0 +1,21 @@
+{
+  "type": "bingo:death",
+  "level": 4,
+  "target": {
+    "damage_type": "minecraft:falling_anvil"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky"
+  ],
+  "display": {
+    "icon": "minecraft:anvil",
+    "name": {
+      "translate": "bingo.obj.death.anvil"
+    },
+    "description": {
+      "translate": "bingo.obj.death.anvil.desc"
+    }
+  }
+}

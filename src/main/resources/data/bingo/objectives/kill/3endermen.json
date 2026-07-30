@@ -1,11 +1,11 @@
 {
   "type": "bingo:kill_mob",
-  "level": 2,
+  "level": 3,
   "target": {
     "entity_type": "minecraft:enderman"
   },
-  "count": 2,
-  "weight": 8,
+  "count": 3,
+  "weight": 10,
   "tags": [
     "bingo:overworld",
     "bingo:combat"
@@ -13,11 +13,11 @@
   "display": {
     "icon": "minecraft:enderman_spawn_egg",
     "name": {
-      "translate": "bingo.obj.kill.enderman"
+      "translate": "bingo.obj.kill.3endermen"
     },
     "description": {
-      "translate": "bingo.obj.kill.enderman.desc"
+      "translate": "bingo.obj.kill.3endermen.desc"
     },
-    "icon_count": 2
+    "icon_count": 3
   }
 }

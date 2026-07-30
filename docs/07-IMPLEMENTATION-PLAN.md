@@ -38,7 +38,7 @@ Cinq lots de construction (0 à 5), puis une passe de durcissement (lot 6). Chac
 1.6 | Résolution des pools (`entries` ∪ `include_tags` ∪ `inherit` − `exclude_tags`) | `01` §6 |
 1.7 | `BoardGenerator` — tirage pondéré respectant la distribution, gestion des `conflicts` | `01` §7 |
 1.8 | Comblement gracieux si un niveau est sous-alimenté (WARN, pas de crash) | `01` §7 |
-1.9 | *(déjà livré : 45 objectifs — 13 N1 / 11 N2 / 12 N3 / 9 N4. Vérifier qu'ils chargent tous.)* | `01` §4 |
+1.9 | *(déjà livré : 58 objectifs — 21 N1 / 12 N2 / 9 N3 / 9 N4 / 7 N5. Vérifier qu'ils chargent tous.)* | `01` §4 |
 1.10 | *(déjà livré : 4 profils + `bingo:classic` + `bingo:default`)* | `01` §7-8 |
 1.11 | *(déjà livré : `#bingo:roll_decoys`, 69 items)* | `04` §3 |
 1.12 | `/bingo reload`, `/bingo debug dump` | `05` §4.1 |

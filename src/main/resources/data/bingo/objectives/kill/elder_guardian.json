@@ -1,6 +1,6 @@
 {
   "type": "bingo:kill_mob",
-  "level": 4,
+  "level": 5,
   "target": {
     "entity_type": "minecraft:elder_guardian"
   },

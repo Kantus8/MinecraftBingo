@@ -1,6 +1,6 @@
 {
   "type": "bingo:death",
-  "level": 3,
+  "level": 5,
   "target": {
     "damage_type": "minecraft:wither"
   },

@@ -81,11 +81,11 @@ Côté implémentation, `ResourceFinder`/`manager.findAllResources("objectives",
 | 2 | Standard | ×2 | Une boucle courte : miner, crafter, tuer un mob commun. | 2–8 min |
 | 3 | Engagé | ×4 | Nécessite un déplacement, une structure ou une ressource rare. | 8–20 min |
 | 4 | Extrême | ×8 | Nether/End, boss, ou chaîne de craft longue. Le pari risqué. | > 20 min |
-| 5 | — | ×16 | **Réservé, aucun objectif livré.** Palier ouvert pour les objectifs plus durs que N4. | — |
+| 5 | Légendaire | ×16 | Boss, dimension lointaine ou chaîne complète. Décide la manche à lui seul. | > 40 min |
 
 Le **niveau n'est pas une estimation de temps** mais un contrat de score : viser la cohérence du multiplicateur, pas la précision du chrono.
 
-Le niveau 5 existe dans le schéma et dans le tirage, mais aucun objectif ni aucun profil livré ne l'utilise : les 4 profils déclarent `"5": 0`. Un profil qui demanderait des cases N5 sans objectif correspondant serait comblé par le niveau voisin avec un WARN, comme pour tout niveau sous-alimenté.
+Seul `extreme` tire des cases N5 ; les trois autres profils déclarent `"5": 0`. Un profil qui demanderait plus de cases d'un niveau qu'il n'existe d'objectifs serait comblé par le niveau voisin avec un WARN.
 
 ---
 
@@ -293,10 +293,10 @@ Résolution : `entries` ∪ (objectifs matchant `include_tags`) ∪ (pools de `i
 
 | Profil | N1 | N2 | N3 | N4 | N5 | Somme | Score max théorique* |
 |---|---|---|---|---|---|---|---|
-| `easy` | 12 | 9 | 4 | 0 | 0 | 25 | 4 600 |
-| `normal` | 8 | 9 | 6 | 2 | 0 | 25 | 6 600 |
-| `hard` | 4 | 8 | 9 | 4 | 0 | 25 | 8 800 |
-| `extreme` | 2 | 5 | 10 | 8 | 0 | 25 | 11 600 |
+| `easy` | 15 | 10 | 0 | 0 | 0 | 25 | 3 500 |
+| `normal` | 9 | 10 | 6 | 0 | 0 | 25 | 5 300 |
+| `hard` | 3 | 10 | 9 | 3 | 0 | 25 | 8 300 |
+| `extreme` | 0 | 6 | 7 | 9 | 3 | 25 | 16 000 |
 
 \* Somme de `100 × 2^(level-1)` sur les 25 cases. Sert au calibrage relatif, pas à un objectif de jeu (personne ne complète 25 cases).
 

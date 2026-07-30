@@ -1,6 +1,6 @@
 {
   "type": "bingo:action",
-  "level": 3,
+  "level": 4,
   "target": {
     "trigger": "bingo:enchant_item",
     "params": {

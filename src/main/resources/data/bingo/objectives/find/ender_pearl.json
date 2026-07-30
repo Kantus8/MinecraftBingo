@@ -1,6 +1,6 @@
 {
   "type": "bingo:find",
-  "level": 3,
+  "level": 2,
   "target": {
     "item": "minecraft:ender_pearl"
   },

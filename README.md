@@ -216,7 +216,7 @@ Le cadrage complet est dans **`docs/`**. Commencer par [`docs/00-OVERVIEW.md`](d
 
 Le cadrage est accompagné de datapacks fonctionnels, conformes au schéma de `docs/01` :
 
-- **45 objectifs** — 5 types (`craft`, `find`, `kill_mob`, `death`, `action`), répartis en 13 N1 / 11 N2 / 12 N3 / 9 N4 : de quoi remplir les 25 cases des 4 profils sans répétition
+- **58 objectifs** — 5 types (`craft`, `find`, `kill_mob`, `death`, `action`), répartis en 21 N1 / 12 N2 / 9 N3 / 9 N4 / 7 N5 : de quoi remplir les 25 cases des 4 profils sans répétition
 - **4 profils de difficulté** — `easy`, `normal`, `hard`, `extreme` (distribution validée à 25 cases)
 - **1 pool** (`bingo:default`) et **1 ruleset** (`bingo:classic`)
 - **1 tag de leurres** (`#bingo:roll_decoys`, 69 items) pour l'animation de tirage — désormais **généré par datagen** depuis une liste typée (`gradlew runDatagen`)

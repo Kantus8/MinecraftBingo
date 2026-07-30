@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 3,
+  "target": {
+    "item": "minecraft:suspicious_stew"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:suspicious_stew",
+    "name": {
+      "translate": "bingo.obj.craft.suspiciousstew"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.suspiciousstew.desc"
+    }
+  }
+}

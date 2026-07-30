@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:smooth_stone"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:smooth_stone",
+    "name": {
+      "translate": "bingo.obj.craft.smooth_stone"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.smooth_stone.desc"
+    }
+  }
+}

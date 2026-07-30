@@ -1,0 +1,20 @@
+{
+  "type": "bingo:find",
+  "level": 3,
+  "target": {
+    "tag": "#minecraft:music_discs"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:music_disc_chirp",
+    "name": {
+      "translate": "bingo.obj.find.musicdisk"
+    },
+    "description": {
+      "translate": "bingo.obj.find.musicdisk.desc"
+    }
+  }
+}

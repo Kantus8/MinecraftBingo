@@ -1,0 +1,20 @@
+{
+  "type": "bingo:find",
+  "level": 3,
+  "target": {
+    "item": "minecraft:axolotl_bucket"
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:axolotl_bucket",
+    "name": {
+      "translate": "bingo.obj.find.axolotlbucket"
+    },
+    "description": {
+      "translate": "bingo.obj.find.axolotlbucket.desc"
+    }
+  }
+}

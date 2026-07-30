@@ -1,6 +1,6 @@
 {
   "type": "bingo:craft",
-  "level": 3,
+  "level": 4,
   "target": {
     "item": "minecraft:brewing_stand"
   },

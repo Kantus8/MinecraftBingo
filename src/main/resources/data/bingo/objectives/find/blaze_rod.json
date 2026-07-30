@@ -1,6 +1,6 @@
 {
   "type": "bingo:find",
-  "level": 3,
+  "level": 4,
   "target": {
     "item": "minecraft:blaze_rod"
   },
