@@ -1,0 +1,51 @@
+{
+  "ui.objective_complete": {
+    "category": "player",
+    "subtitle": "subtitles.bingo.objective_complete",
+    "sounds": [
+      { "name": "minecraft:block.note_block.pling", "type": "event" }
+    ]
+  },
+  "ui.line_complete": {
+    "category": "player",
+    "subtitle": "subtitles.bingo.line_complete",
+    "sounds": [
+      { "name": "minecraft:block.note_block.chime", "type": "event" }
+    ]
+  },
+  "ui.bingo": {
+    "category": "player",
+    "subtitle": "subtitles.bingo.bingo",
+    "sounds": [
+      { "name": "minecraft:ui.toast.challenge_complete", "type": "event" }
+    ]
+  },
+  "ui.countdown_tick": {
+    "category": "player",
+    "subtitle": "subtitles.bingo.countdown_tick",
+    "sounds": [
+      { "name": "minecraft:block.note_block.hat", "type": "event" }
+    ]
+  },
+  "ui.game_start": {
+    "category": "player",
+    "subtitle": "subtitles.bingo.game_start",
+    "sounds": [
+      { "name": "minecraft:block.beacon.activate", "type": "event" }
+    ]
+  },
+  "ui.game_end": {
+    "category": "player",
+    "subtitle": "subtitles.bingo.game_end",
+    "sounds": [
+      { "name": "minecraft:block.beacon.deactivate", "type": "event" }
+    ]
+  },
+  "ui.card_flip": {
+    "category": "player",
+    "subtitle": "subtitles.bingo.card_flip",
+    "sounds": [
+      { "name": "minecraft:item.book.page_turn", "type": "event" }
+    ]
+  }
+}

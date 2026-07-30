@@ -1,0 +1,21 @@
+{
+  "type": "bingo:find",
+  "level": 3,
+  "target": {
+    "item": "minecraft:blaze_rod"
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:nether"
+  ],
+  "requires_dimension": "minecraft:the_nether",
+  "display": {
+    "icon": "minecraft:blaze_rod",
+    "name": {
+      "translate": "bingo.obj.find.blaze_rod"
+    },
+    "description": {
+      "translate": "bingo.obj.find.blaze_rod.desc"
+    }
+  }
+}

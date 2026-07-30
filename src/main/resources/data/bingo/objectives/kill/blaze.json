@@ -1,0 +1,22 @@
+{
+  "type": "bingo:kill_mob",
+  "level": 3,
+  "target": {
+    "entity_type": "minecraft:blaze"
+  },
+  "display": {
+    "icon": "minecraft:blaze_spawn_egg",
+    "name": {
+      "translate": "bingo.obj.kill.blaze"
+    },
+    "description": {
+      "translate": "bingo.obj.kill.blaze.desc"
+    }
+  },
+  "weight": 7,
+  "tags": [
+    "bingo:nether",
+    "bingo:combat"
+  ],
+  "requires_dimension": "minecraft:the_nether"
+}

@@ -1,0 +1,24 @@
+{
+  "type": "bingo:action",
+  "level": 3,
+  "target": {
+    "trigger": "bingo:enter_dimension",
+    "params": {
+      "dimension": "minecraft:the_nether"
+    }
+  },
+  "display": {
+    "icon": "minecraft:obsidian",
+    "name": {
+      "translate": "bingo.obj.action.enter_nether"
+    },
+    "description": {
+      "translate": "bingo.obj.action.enter_nether.desc"
+    }
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:nether"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "type": "bingo:action",
+  "level": 3,
+  "target": {
+    "trigger": "bingo:enchant_item",
+    "params": {
+      "min_level": 1
+    }
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:enchanted_book",
+    "name": {
+      "translate": "bingo.obj.action.enchant_item"
+    },
+    "description": {
+      "translate": "bingo.obj.action.enchant_item.desc"
+    }
+  }
+}

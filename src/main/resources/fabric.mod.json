@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "Mod de Bingo compétitif multijoueur pour Minecraft : cartes d'objectifs générées, équipes, HUD temps réel, chat vocal de proximité par équipe et intégration JEI.",
+  "authors": [
+    "Math"
+  ],
+  "contact": {
+    "homepage": "https://github.com/Kantus8/MinecraftBingo",
+    "sources": "https://github.com/Kantus8/MinecraftBingo",
+    "issues": "https://github.com/Kantus8/MinecraftBingo/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/${mod_id}/icon.png",
+
+  "environment": "*",
+
+  "entrypoints": {
+    "main": [
+      "com.bingo.mod.BingoMod"
+    ],
+    "client": [
+      "com.bingo.mod.client.BingoModClient"
+    ],
+    "server": [
+      "com.bingo.mod.BingoModServer"
+    ],
+    "fabric-datagen": [
+      "com.bingo.mod.data.BingoDataGenerator"
+    ],
+    "voicechat": [
+      "com.bingo.mod.integration.voicechat.BingoVoicechatPlugin"
+    ],
+    "jei_mod_plugin": [
+      "com.bingo.mod.integration.jei.BingoJeiPlugin"
+    ]
+  },
+
+  "mixins": [
+    "bingo.mixins.json",
+    {
+      "config": "bingo.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+
+  "depends": {
+    "fabricloader": "${loader_version_range}",
+    "fabric-api": "*",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "voicechat": "${voicechat_version_range}",
+    "jei": "${jei_version_range}"
+  },
+
+  "recommends": {},
+  "suggests": {},
+  "breaks": {}
+}

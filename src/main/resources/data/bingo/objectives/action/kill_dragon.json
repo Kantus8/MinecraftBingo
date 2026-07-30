@@ -1,0 +1,24 @@
+{
+  "type": "bingo:action",
+  "level": 4,
+  "target": {
+    "trigger": "bingo:advancement",
+    "params": {
+      "advancement": "minecraft:end/kill_dragon"
+    }
+  },
+  "display": {
+    "icon": "minecraft:dragon_head",
+    "name": {
+      "translate": "bingo.obj.action.kill_dragon"
+    },
+    "description": {
+      "translate": "bingo.obj.action.kill_dragon.desc"
+    }
+  },
+  "weight": 1,
+  "tags": [
+    "bingo:end",
+    "bingo:boss"
+  ]
+}

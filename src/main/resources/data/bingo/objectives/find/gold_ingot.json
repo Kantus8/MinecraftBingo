@@ -1,0 +1,24 @@
+{
+  "type": "bingo:find",
+  "level": 2,
+  "target": {
+    "item": "minecraft:gold_ingot"
+  },
+  "count": 3,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:nether",
+    "bingo:mining"
+  ],
+  "display": {
+    "icon": "minecraft:gold_ingot",
+    "name": {
+      "translate": "bingo.obj.find.gold_ingot"
+    },
+    "description": {
+      "translate": "bingo.obj.find.gold_ingot.desc"
+    },
+    "icon_count": 3
+  }
+}

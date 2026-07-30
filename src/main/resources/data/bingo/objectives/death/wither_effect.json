@@ -1,0 +1,21 @@
+{
+  "type": "bingo:death",
+  "level": 3,
+  "target": {
+    "damage_type": "minecraft:wither"
+  },
+  "weight": 5,
+  "tags": [
+    "bingo:nether",
+    "bingo:risky"
+  ],
+  "display": {
+    "icon": "minecraft:wither_rose",
+    "name": {
+      "translate": "bingo.obj.death.wither_effect"
+    },
+    "description": {
+      "translate": "bingo.obj.death.wither_effect.desc"
+    }
+  }
+}

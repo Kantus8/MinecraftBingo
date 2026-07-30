@@ -1,0 +1,23 @@
+{
+  "type": "bingo:find",
+  "level": 3,
+  "target": {
+    "item": "minecraft:diamond"
+  },
+  "count": 3,
+  "weight": 9,
+  "tags": [
+    "bingo:overworld",
+    "bingo:mining"
+  ],
+  "display": {
+    "icon": "minecraft:diamond",
+    "name": {
+      "translate": "bingo.obj.find.diamond"
+    },
+    "description": {
+      "translate": "bingo.obj.find.diamond.desc"
+    },
+    "icon_count": 3
+  }
+}

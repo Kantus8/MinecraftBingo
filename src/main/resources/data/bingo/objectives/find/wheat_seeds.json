@@ -1,0 +1,22 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:wheat_seeds"
+  },
+  "count": 3,
+  "weight": 9,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:wheat_seeds",
+    "name": {
+      "translate": "bingo.obj.find.wheat_seeds"
+    },
+    "description": {
+      "translate": "bingo.obj.find.wheat_seeds.desc"
+    },
+    "icon_count": 3
+  }
+}

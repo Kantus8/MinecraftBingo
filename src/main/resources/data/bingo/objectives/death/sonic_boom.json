@@ -1,0 +1,22 @@
+{
+  "type": "bingo:death",
+  "level": 4,
+  "target": {
+    "damage_type": "minecraft:sonic_boom"
+  },
+  "display": {
+    "icon": "minecraft:sculk_shrieker",
+    "name": {
+      "translate": "bingo.obj.death.sonic_boom"
+    },
+    "description": {
+      "translate": "bingo.obj.death.sonic_boom.desc"
+    }
+  },
+  "weight": 2,
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky",
+    "bingo:deep_dark"
+  ]
+}

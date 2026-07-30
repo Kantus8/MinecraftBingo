@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:crafting_table"
+  },
+  "display": {
+    "icon": "minecraft:crafting_table",
+    "name": {
+      "translate": "bingo.obj.craft.crafting_table"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.crafting_table.desc"
+    }
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ]
+}

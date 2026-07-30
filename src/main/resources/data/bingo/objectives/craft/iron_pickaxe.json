@@ -1,0 +1,25 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:iron_pickaxe"
+  },
+  "display": {
+    "icon": "minecraft:iron_pickaxe",
+    "name": {
+      "translate": "bingo.obj.craft.iron_pickaxe"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.iron_pickaxe.desc"
+    }
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting",
+    "bingo:mining"
+  ],
+  "conflicts": [
+    "bingo:craft/iron_sword"
+  ]
+}

@@ -1,0 +1,41 @@
+# --- Gradle ---------------------------------------------------------
+.gradle/
+build/
+out/
+classes/
+!gradle/wrapper/gradle-wrapper.properties
+
+# Le jar du wrapper est récupéré par setup.bat / setup.sh.
+# Décommente la ligne suivante si tu préfères le committer (pratique courante).
+gradle/wrapper/gradle-wrapper.jar
+
+# --- Environnement de run Minecraft --------------------------------
+run/
+runs/
+!run/.gitkeep
+
+# --- IDE ------------------------------------------------------------
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+bin/
+*.launch
+
+# --- Loom / remap ---------------------------------------------------
+.fabric/
+remappedSrc/
+*.log
+
+# --- OS -------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Secrets / publication -----------------------------------------
+*.env
+publish.properties

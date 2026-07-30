@@ -1,0 +1,21 @@
+{
+  "type": "bingo:action",
+  "level": 2,
+  "target": {
+    "trigger": "bingo:trade_with_villager",
+    "params": {}
+  },
+  "weight": 9,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:emerald",
+    "name": {
+      "translate": "bingo.obj.action.trade_villager"
+    },
+    "description": {
+      "translate": "bingo.obj.action.trade_villager.desc"
+    }
+  }
+}

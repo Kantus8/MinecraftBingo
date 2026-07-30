@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 3,
+  "target": {
+    "item": "minecraft:golden_apple"
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:golden_apple",
+    "name": {
+      "translate": "bingo.obj.craft.golden_apple"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.golden_apple.desc"
+    }
+  }
+}

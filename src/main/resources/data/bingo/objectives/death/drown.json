@@ -1,0 +1,21 @@
+{
+  "type": "bingo:death",
+  "level": 2,
+  "target": {
+    "damage_type": "minecraft:drown"
+  },
+  "display": {
+    "icon": "minecraft:water_bucket",
+    "name": {
+      "translate": "bingo.obj.death.drown"
+    },
+    "description": {
+      "translate": "bingo.obj.death.drown.desc"
+    }
+  },
+  "weight": 7,
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "type": "bingo:kill_mob",
+  "level": 2,
+  "target": {
+    "entity_type": "minecraft:creeper"
+  },
+  "display": {
+    "icon": "minecraft:creeper_spawn_egg",
+    "name": {
+      "translate": "bingo.obj.kill.creeper"
+    },
+    "description": {
+      "translate": "bingo.obj.kill.creeper.desc"
+    }
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:combat"
+  ]
+}

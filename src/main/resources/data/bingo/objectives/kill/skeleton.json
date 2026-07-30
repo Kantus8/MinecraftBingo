@@ -1,0 +1,23 @@
+{
+  "type": "bingo:kill_mob",
+  "level": 2,
+  "target": {
+    "tag": "#minecraft:skeletons"
+  },
+  "count": 3,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:combat"
+  ],
+  "display": {
+    "icon": "minecraft:skeleton_spawn_egg",
+    "name": {
+      "translate": "bingo.obj.kill.skeleton"
+    },
+    "description": {
+      "translate": "bingo.obj.kill.skeleton.desc"
+    },
+    "icon_count": 3
+  }
+}

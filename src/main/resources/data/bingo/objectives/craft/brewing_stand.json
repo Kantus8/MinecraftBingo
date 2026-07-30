@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 3,
+  "target": {
+    "item": "minecraft:brewing_stand"
+  },
+  "weight": 7,
+  "tags": [
+    "bingo:nether",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:brewing_stand",
+    "name": {
+      "translate": "bingo.obj.craft.brewing_stand"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.brewing_stand.desc"
+    }
+  }
+}

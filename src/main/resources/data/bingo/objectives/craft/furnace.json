@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:furnace"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:furnace",
+    "name": {
+      "translate": "bingo.obj.craft.furnace"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.furnace.desc"
+    }
+  }
+}

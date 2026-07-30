@@ -1,0 +1,21 @@
+{
+  "type": "bingo:action",
+  "level": 1,
+  "target": {
+    "trigger": "bingo:sleep_in_bed",
+    "params": {}
+  },
+  "display": {
+    "icon": "minecraft:red_bed",
+    "name": {
+      "translate": "bingo.obj.action.sleep_in_bed"
+    },
+    "description": {
+      "translate": "bingo.obj.action.sleep_in_bed.desc"
+    }
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ]
+}

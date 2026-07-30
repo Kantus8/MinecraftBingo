@@ -1,0 +1,22 @@
+{
+  "type": "bingo:death",
+  "level": 3,
+  "target": {
+    "damage_type": "minecraft:lava"
+  },
+  "display": {
+    "icon": "minecraft:lava_bucket",
+    "name": {
+      "translate": "bingo.obj.death.lava"
+    },
+    "description": {
+      "translate": "bingo.obj.death.lava.desc"
+    }
+  },
+  "weight": 6,
+  "tags": [
+    "bingo:overworld",
+    "bingo:nether",
+    "bingo:risky"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "display_name": {
+    "translate": "bingo.ruleset.classic"
+  },
+  "board": {
+    "width": 5,
+    "height": 5,
+    "shared_card": true
+  },
+  "win_conditions": [
+    "line",
+    "column",
+    "diagonal"
+  ],
+  "points_base": 100,
+  "line_bonus": 0,
+  "team_size": 2,
+  "max_teams": 4,
+  "tile_lock": false,
+  "elimination_on_death": false,
+  "reveal_opponent_progress": true,
+  "roll_animation": true,
+  "freeze_during_roll": true,
+  "voice": {
+    "enabled": true,
+    "lobby_mode": "global",
+    "round_mode": "team_open"
+  },
+  "timings": {
+    "countdown_seconds": 5,
+    "roll_ticks": 60,
+    "time_limit_seconds": 3600
+  },
+  "_comment_time_limit": "Repli uniquement : le profil de difficulte est prioritaire (voir docs/01 §7)."
+}

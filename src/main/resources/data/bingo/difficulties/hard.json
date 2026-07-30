@@ -1,0 +1,14 @@
+{
+  "display_name": {
+    "translate": "bingo.difficulty.hard"
+  },
+  "pool": "bingo:default",
+  "distribution": {
+    "1": 4,
+    "2": 8,
+    "3": 9,
+    "4": 4
+  },
+  "time_limit_seconds": 5400,
+  "ruleset": "bingo:classic"
+}

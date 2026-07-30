@@ -1,0 +1,22 @@
+{
+  "type": "bingo:craft",
+  "level": 4,
+  "target": {
+    "item": "minecraft:netherite_pickaxe"
+  },
+  "weight": 3,
+  "tags": [
+    "bingo:nether",
+    "bingo:crafting",
+    "bingo:mining"
+  ],
+  "display": {
+    "icon": "minecraft:netherite_pickaxe",
+    "name": {
+      "translate": "bingo.obj.craft.netherite_pickaxe"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.netherite_pickaxe.desc"
+    }
+  }
+}

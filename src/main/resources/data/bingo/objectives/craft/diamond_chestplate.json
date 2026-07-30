@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 3,
+  "target": {
+    "item": "minecraft:diamond_chestplate"
+  },
+  "display": {
+    "icon": "minecraft:diamond_chestplate",
+    "name": {
+      "translate": "bingo.obj.craft.diamond_chestplate"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.diamond_chestplate.desc"
+    }
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ]
+}

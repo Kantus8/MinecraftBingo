@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:shield"
+  },
+  "weight": 9,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:shield",
+    "name": {
+      "translate": "bingo.obj.craft.shield"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.shield.desc"
+    }
+  }
+}

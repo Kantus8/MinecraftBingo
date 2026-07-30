@@ -1,0 +1,21 @@
+{
+  "type": "bingo:death",
+  "level": 1,
+  "target": {
+    "damage_type": "minecraft:fall"
+  },
+  "display": {
+    "icon": "minecraft:feather",
+    "name": {
+      "translate": "bingo.obj.death.fall"
+    },
+    "description": {
+      "translate": "bingo.obj.death.fall.desc"
+    }
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky"
+  ]
+}

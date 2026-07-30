@@ -1,0 +1,23 @@
+{
+  "type": "bingo:find",
+  "level": 2,
+  "target": {
+    "item": "minecraft:iron_ingot"
+  },
+  "count": 5,
+  "display": {
+    "icon": "minecraft:iron_ingot",
+    "name": {
+      "translate": "bingo.obj.find.iron_ingot"
+    },
+    "description": {
+      "translate": "bingo.obj.find.iron_ingot.desc"
+    },
+    "icon_count": 5
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:mining"
+  ]
+}

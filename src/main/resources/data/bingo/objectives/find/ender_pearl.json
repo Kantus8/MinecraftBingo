@@ -1,0 +1,20 @@
+{
+  "type": "bingo:find",
+  "level": 3,
+  "target": {
+    "item": "minecraft:ender_pearl"
+  },
+  "display": {
+    "icon": "minecraft:ender_pearl",
+    "name": {
+      "translate": "bingo.obj.find.ender_pearl"
+    },
+    "description": {
+      "translate": "bingo.obj.find.ender_pearl.desc"
+    }
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld"
+  ]
+}

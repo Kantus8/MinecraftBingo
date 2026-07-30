@@ -1,0 +1,22 @@
+{
+  "type": "bingo:find",
+  "level": 4,
+  "target": {
+    "item": "minecraft:ancient_debris"
+  },
+  "display": {
+    "icon": "minecraft:ancient_debris",
+    "name": {
+      "translate": "bingo.obj.find.ancient_debris"
+    },
+    "description": {
+      "translate": "bingo.obj.find.ancient_debris.desc"
+    }
+  },
+  "weight": 4,
+  "tags": [
+    "bingo:nether",
+    "bingo:mining"
+  ],
+  "requires_dimension": "minecraft:the_nether"
+}

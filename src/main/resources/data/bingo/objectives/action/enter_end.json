@@ -1,0 +1,24 @@
+{
+  "type": "bingo:action",
+  "level": 4,
+  "target": {
+    "trigger": "bingo:enter_dimension",
+    "params": {
+      "dimension": "minecraft:the_end"
+    }
+  },
+  "weight": 2,
+  "tags": [
+    "bingo:overworld",
+    "bingo:end"
+  ],
+  "display": {
+    "icon": "minecraft:end_portal_frame",
+    "name": {
+      "translate": "bingo.obj.action.enter_end"
+    },
+    "description": {
+      "translate": "bingo.obj.action.enter_end.desc"
+    }
+  }
+}

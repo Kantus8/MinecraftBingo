@@ -1,0 +1,21 @@
+{
+  "type": "bingo:find",
+  "level": 4,
+  "target": {
+    "item": "minecraft:nether_star"
+  },
+  "weight": 1,
+  "tags": [
+    "bingo:nether",
+    "bingo:boss"
+  ],
+  "display": {
+    "icon": "minecraft:nether_star",
+    "name": {
+      "translate": "bingo.obj.find.nether_star"
+    },
+    "description": {
+      "translate": "bingo.obj.find.nether_star.desc"
+    }
+  }
+}

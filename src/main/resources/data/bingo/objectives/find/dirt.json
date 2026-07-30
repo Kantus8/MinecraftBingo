@@ -1,0 +1,22 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:dirt"
+  },
+  "count": 16,
+  "display": {
+    "icon": "minecraft:dirt",
+    "name": {
+      "translate": "bingo.obj.find.dirt"
+    },
+    "description": {
+      "translate": "bingo.obj.find.dirt.desc"
+    },
+    "icon_count": 16
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ]
+}

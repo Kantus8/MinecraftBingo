@@ -1,0 +1,235 @@
+// =====================================================================
+//  Minecraft Bingo — build Fabric 1.20.1
+//  Loom 1.7 / Gradle 8.8 / Java 17
+//  Les versions se règlent dans gradle.properties, pas ici.
+// =====================================================================
+
+plugins {
+    id 'fabric-loom' version '1.7-SNAPSHOT'
+    id 'maven-publish'
+}
+
+version = "${project.mod_version}+mc${project.minecraft_version}"
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+// ---------------------------------------------------------------------
+//  Loom : source sets séparés client / commun
+//  -> src/main/java   = code commun (logique serveur autoritaire)
+//  -> src/client/java = code client uniquement (HUD, écrans, rendu)
+//  Toute référence accidentelle à une classe client depuis src/main
+//  échoue à la compilation : c'est voulu, ça évite les crash serveur.
+// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+//  Sortie de datagen (tâche 5.1)
+//  Le run "datagen" écrit dans src/main/generated (voir loom.runs plus bas).
+//  On l'ajoute aux ressources de "main" pour que les fichiers générés —
+//  aujourd'hui le seul #bingo:roll_decoys — soient embarqués dans le jar au
+//  même titre que les datapacks écrits à la main. Sans ce srcDir, runDatagen
+//  produirait des fichiers que le build ignorerait.
+//  Le run manuel ci-dessous remplace fabricApi.configureDataGeneration(),
+//  qui ferait ce câblage automatiquement mais impose sa propre convention de run.
+// ---------------------------------------------------------------------
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/main/generated'
+        }
+    }
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        "bingo" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+
+    runs {
+        // Les sources sont en UTF-8 (voir tasks.withType(JavaCompile) plus bas), mais sur
+        // Java 17 "file.encoding" vaut le charset de la plateforme — windows-1252 ici.
+        // Sans ce flag, log4j écrit les logs dans ce charset et tout message accentué
+        // ressort en mojibake (« État » -> « Ètat »), console comme fichier.
+        // Java 18+ n'en aurait pas besoin (UTF-8 par défaut, JEP 400), mais 1.20.1 est en 17.
+        configureEach {
+            vmArg "-Dfile.encoding=UTF-8"
+        }
+
+        // Génération des ressources (datagen) : ./gradlew runDatagen
+        datagen {
+            inherit server
+            name "Data Generation"
+            vmArg "-Dfabric-api.datagen"
+            vmArg "-Dfabric-api.datagen.output-dir=${file("src/main/generated")}"
+            vmArg "-Dfabric-api.datagen.modid=${project.mod_id}"
+            runDir "build/datagen"
+        }
+    }
+}
+
+// ---------------------------------------------------------------------
+//  Dépôts Maven
+// ---------------------------------------------------------------------
+repositories {
+    // Simple Voice Chat (Max Henkel)
+    maven {
+        name = 'Henkelmax'
+        url = 'https://maven.maxhenkel.de/repository/public'
+    }
+    // JEI (BlameJared / mezz)
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com/'
+        content {
+            includeGroup 'mezz.jei'
+        }
+    }
+    // Cloth Config / Mod Menu si besoin plus tard
+    maven {
+        name = 'Terraformers'
+        url = 'https://maven.terraformersmc.com/'
+    }
+    // Modrinth : sert uniquement au jar complet de Simple Voice Chat
+    // pour runClient / runServer (l'API seule ne suffit pas à l'exécution).
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
+    mavenCentral()
+}
+
+// ---------------------------------------------------------------------
+//  Dépendances
+// ---------------------------------------------------------------------
+dependencies {
+    // ---- Socle Minecraft / Fabric ----
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    // Fabric API — requis à l'exécution
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // ---- Simple Voice Chat API ----
+    // L'artefact "voicechat-api" ne contient AUCUNE classe Minecraft :
+    // on l'utilise en compileOnly classique (pas modCompileOnly, pas de remap).
+    // Le mod Simple Voice Chat est déclaré "depends" dans fabric.mod.json.
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${project.voicechat_api_version}"
+    // Idem pour le source set client
+    clientCompileOnly "de.maxhenkel.voicechat:voicechat-api:${project.voicechat_api_version}"
+
+    // ---- JEI ----
+    // API seule à la compilation (annotations + interfaces IModPlugin).
+    // NB : la classe du plugin JEI vit dans src/main/java/com/bingo/mod/integration/jei/
+    //      (le source set "client" hérite du classpath de compilation de "main").
+    //
+    // ⚠️ mezz publie DEUX variantes de l'API commune :
+    //      jei-<mc>-common-api               -> mappings MOJANG (pour Forge/NeoForge)
+    //      jei-<mc>-common-api-intermediary  -> mappings intermediary (pour Fabric)
+    //    Le POM de "fabric-api" déclare la variante Mojang en transitive. Loom remappe
+    //    tous les mods en UN SEUL passage de tiny-remapper, qui dédoublonne les classes
+    //    entre les entrées : les copies Mojang gagnent, et l'API se retrouve en
+    //    net.minecraft.resources.ResourceLocation au lieu de net.minecraft.util.Identifier.
+    //    D'où transitive = false + la variante intermediary déclarée explicitement.
+    modCompileOnly "mezz.jei:jei-${project.minecraft_version}-common-api-intermediary:${project.jei_version}"
+    modCompileOnly("mezz.jei:jei-${project.minecraft_version}-fabric-api:${project.jei_version}") {
+        transitive = false
+    }
+
+    // ---- Runtime de développement ----
+    // Ces jars ne sont PAS embarqués dans le build final (`localRuntime`), ils servent
+    // uniquement à lancer runClient / runServer avec les mods présents.
+    //
+    // Ils sont ACTIFS et non commentés parce que voicechat et jei sont en `depends`
+    // DUR dans fabric.mod.json : sans eux, Loader refuse de démarrer le jeu et aucune
+    // recette de lot n'est vérifiable. Les commenter revient à casser runClient.
+    // ⚠️ transitive = false OBLIGATOIRE sur JEI.
+    // Le jar "jei-<mc>-fabric" est un fat jar (915 classes) qui embarque déjà les
+    // modules common / core / lib / gui. Mais son POM les déclare AUSSI en dépendances,
+    // et ces artefacts-là sont en mappings MOJANG. Comme Loom remappe tous les mods en
+    // un seul passage de tiny-remapper avec dédoublonnage des classes, les copies Mojang
+    // écrasent celles du fat jar dans la SORTIE remappée.
+    // Symptôme : NoClassDefFoundError net/minecraft/resources/ResourceLocation dans
+    // mezz.jei.common.Constants au démarrage (ResourceLocation = nom Mojang d'Identifier).
+    //
+    // ⚠️ Si ce crash est déjà arrivé, la sortie polluée est en cache et corriger la
+    //    dépendance ne suffit PAS. Purger le cache de remap :
+    //        rm -rf .gradle/loom-cache/remapped_mods/*/mezz
+    modLocalRuntime("mezz.jei:jei-${project.minecraft_version}-fabric:${project.jei_version}") {
+        transitive = false
+    }
+    modLocalRuntime "maven.modrinth:simple-voice-chat:fabric-${project.minecraft_version}-${project.voicechat_mod_version}"
+}
+
+// ---------------------------------------------------------------------
+//  Traitement des ressources : injection des versions dans fabric.mod.json
+// ---------------------------------------------------------------------
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mod_id", project.mod_id
+    inputs.property "mod_name", project.mod_name
+    inputs.property "minecraft_version", project.minecraft_version
+    inputs.property "loader_version_range", project.loader_version_range
+    inputs.property "fabric_version", project.fabric_version
+    inputs.property "voicechat_version_range", project.voicechat_version_range
+    inputs.property "jei_version_range", project.jei_version_range
+
+    filesMatching("fabric.mod.json") {
+        expand(
+            "version": project.version,
+            "mod_id": project.mod_id,
+            "mod_name": project.mod_name,
+            "minecraft_version": project.minecraft_version,
+            "loader_version_range": project.loader_version_range,
+            "fabric_version": project.fabric_version,
+            "voicechat_version_range": project.voicechat_version_range,
+            "jei_version_range": project.jei_version_range
+        )
+    }
+}
+
+// ---------------------------------------------------------------------
+//  Java 17
+// ---------------------------------------------------------------------
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    it.options.release = Integer.parseInt(project.java_version)
+}
+
+java {
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.toVersion(project.java_version)
+    targetCompatibility = JavaVersion.toVersion(project.java_version)
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archives_base_name}" }
+    }
+}
+
+// ---------------------------------------------------------------------
+//  Publication (Maven local par défaut)
+// ---------------------------------------------------------------------
+publishing {
+    publications {
+        create("mavenJava", MavenPublication) {
+            artifactId = project.archives_base_name
+            from components.java
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "bingo:death",
+  "level": 1,
+  "target": {
+    "damage_type": "minecraft:cactus"
+  },
+  "weight": 7,
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky"
+  ],
+  "display": {
+    "icon": "minecraft:cactus",
+    "name": {
+      "translate": "bingo.obj.death.cactus"
+    },
+    "description": {
+      "translate": "bingo.obj.death.cactus.desc"
+    }
+  }
+}

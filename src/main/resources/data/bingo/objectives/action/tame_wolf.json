@@ -1,0 +1,23 @@
+{
+  "type": "bingo:action",
+  "level": 2,
+  "target": {
+    "trigger": "bingo:tame_animal",
+    "params": {
+      "entity_type": "minecraft:wolf"
+    }
+  },
+  "display": {
+    "icon": "minecraft:bone",
+    "name": {
+      "translate": "bingo.obj.action.tame_wolf"
+    },
+    "description": {
+      "translate": "bingo.obj.action.tame_wolf.desc"
+    }
+  },
+  "weight": 9,
+  "tags": [
+    "bingo:overworld"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "display_name": {
+    "translate": "bingo.pool.default"
+  },
+  "entries": [],
+  "include_tags": [
+    "bingo:overworld",
+    "bingo:nether",
+    "bingo:end"
+  ],
+  "exclude_tags": [
+    "bingo:experimental"
+  ],
+  "inherit": []
+}
