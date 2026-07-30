@@ -37,6 +37,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -64,6 +65,18 @@ public final class BingoCommand {
 
 	/** Niveau opérateur (`docs/05` §4). */
 	private static final int PERMISSION_OPERATOR = 2;
+
+	/**
+	 * Option de {@code /bingo start} demandant la téléportation vers une zone vierge.
+	 *
+	 * <p><strong>Un littéral et non un argument booléen</strong> : {@code ruleset} est un
+	 * {@code word()}, qui avalerait un {@code true} placé derrière lui et le ferait résoudre en
+	 * identifiant de ruleset inconnu. Brigadier essaie les littéraux avant les arguments
+	 * ({@code CommandNode#getRelevantNodes}), donc le mot {@code teleport} est reconnu sans ambiguïté
+	 * à la place du ruleset comme après lui. Corollaire à connaître : un ruleset qui s'appellerait
+	 * {@code teleport} deviendrait inatteignable.
+	 */
+	private static final String TELEPORT_OPTION = "teleport";
 
 	private static final DynamicCommandExceptionType UNKNOWN_DIFFICULTY =
 			new DynamicCommandExceptionType(id -> Text.translatable("bingo.command.error.unknown_difficulty", id));
@@ -168,11 +181,14 @@ public final class BingoCommand {
 						.requires(operator())
 						.then(CommandManager.argument("difficulty", StringArgumentType.word())
 								.suggests(DIFFICULTY_SUGGESTIONS)
-								.executes(context -> start(context, Optional.empty()))
+								.executes(context -> start(context, Optional.empty(), false))
+								.then(CommandManager.literal(TELEPORT_OPTION)
+										.executes(context -> start(context, Optional.empty(), true)))
 								.then(CommandManager.argument("ruleset", StringArgumentType.word())
 										.suggests(RULESET_SUGGESTIONS)
-										.executes(context -> start(context, Optional.of(
-												resolveDataId(StringArgumentType.getString(context, "ruleset"))))))))
+										.executes(context -> start(context, rulesetArgument(context), false))
+										.then(CommandManager.literal(TELEPORT_OPTION)
+												.executes(context -> start(context, rulesetArgument(context), true))))))
 				.then(CommandManager.literal("stop").requires(operator()).executes(BingoCommand::stop))
 				.then(CommandManager.literal("pause").requires(operator()).executes(BingoCommand::pause))
 				.then(CommandManager.literal("resume").requires(operator()).executes(BingoCommand::resume))
@@ -383,13 +399,19 @@ public final class BingoCommand {
 
 	// ── Cycle de partie ───────────────────────────────────────────────────────
 
-	private static int start(CommandContext<ServerCommandSource> context, Optional<Identifier> ruleset)
+	private static Optional<Identifier> rulesetArgument(CommandContext<ServerCommandSource> context)
 			throws CommandSyntaxException {
+		return Optional.of(resolveDataId(StringArgumentType.getString(context, "ruleset")));
+	}
+
+	private static int start(CommandContext<ServerCommandSource> context, Optional<Identifier> ruleset,
+	                        boolean teleport) throws CommandSyntaxException {
 		ServerCommandSource source = context.getSource();
 		BingoGame game = BingoGame.of(source.getServer());
 		Identifier difficulty = resolveDataId(StringArgumentType.getString(context, "difficulty"));
 
-		BingoGame.StartReport report = game.start(difficulty, ruleset);
+		BingoGame.StartReport report = game.start(difficulty, ruleset,
+				new BingoGame.StartOptions(false, teleport));
 		switch (report.result()) {
 			case WRONG_PHASE -> throw WRONG_PHASE.create(game.phase().name());
 			case NOT_ENOUGH_TEAMS -> throw NOT_ENOUGH_TEAMS.create();
@@ -398,10 +420,28 @@ public final class BingoCommand {
 			case STARTED -> {
 				source.sendFeedback(() -> Text.translatable("bingo.command.start.success",
 						difficultyName(difficulty)).formatted(Formatting.GREEN), true);
+				if (teleport) {
+					reportTeleport(source, report.teleportZone());
+				}
 				reportWarnings(source, report.warnings());
 			}
 		}
 		return 1;
+	}
+
+	/**
+	 * Restitue le sort de l'option {@code teleport}.
+	 *
+	 * <p>Un échec est signalé et non tu : la manche a bel et bien démarré, et un opérateur qui a
+	 * demandé une zone vierge doit savoir que tout le monde est resté sur place — sinon il conclut à
+	 * une téléportation ratée à mi-chemin et lance un {@code /bingo reset}.
+	 */
+	private static void reportTeleport(ServerCommandSource source, Optional<BlockPos> zone) {
+		zone.ifPresentOrElse(
+				anchor -> source.sendFeedback(() -> Text.translatable("bingo.command.start.teleported",
+						anchor.getX(), anchor.getZ()).formatted(Formatting.AQUA), true),
+				() -> source.sendFeedback(() -> Text.translatable("bingo.command.start.teleport_failed")
+						.formatted(Formatting.YELLOW), true));
 	}
 
 	private static int reroll(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -813,7 +853,10 @@ public final class BingoCommand {
 		game.teams().join(player.getUuid(), SOLO_TEAM, game.teamSize());
 		afterTeamChange(game);
 
-		BingoGame.StartReport report = game.start(difficulty, Optional.empty(), true);
+		// Sans téléportation : le test solo sert à voir la boucle de jeu, pas à se retrouver à trois
+		// kilomètres du chantier où l'on développe.
+		BingoGame.StartReport report = game.start(difficulty, Optional.empty(),
+				new BingoGame.StartOptions(true, false));
 		switch (report.result()) {
 			case WRONG_PHASE -> throw WRONG_PHASE.create(game.phase().name());
 			case UNKNOWN_DIFFICULTY -> throw UNKNOWN_DIFFICULTY.create(difficulty.toString());

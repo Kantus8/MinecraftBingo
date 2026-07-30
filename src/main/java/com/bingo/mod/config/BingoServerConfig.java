@@ -35,7 +35,7 @@ import java.util.function.IntSupplier;
  * <p>Les champs restent {@code public static} : ils sont lus directement par {@code BingoGame}, et
  * les cacher derrière des accesseurs qui ne feraient rien serait du bruit. {@link #settings()} en
  * donne une vue par clé, qui est ce dont {@code /bingo config} a besoin — un {@code switch} sur
- * onze noms de clés dans la commande aurait dupliqué les bornes et les défauts.
+ * quatorze noms de clés dans la commande aurait dupliqué les bornes et les défauts.
  *
  * <p>Les clés {@code hud_*} de `docs/05` §4.3 n'y figurent pas : elles sont <em>client</em> et
  * vivent dans {@code config/bingo-client.json} (tâche 4.13).
@@ -85,6 +85,28 @@ public final class BingoServerConfig {
 
 	/** Gestion des groupes vocaux par le mod (`docs/02`). À faux, Simple Voice Chat est laissé seul. */
 	public static boolean voiceEnabled = true;
+
+	/**
+	 * Vidage des inventaires au lancement d'une manche.
+	 *
+	 * <p>À {@code true} par défaut : une manche se joue à égalité de matériel, et un joueur qui arrive
+	 * avec un coffre d'obsidienne coche la moitié de la grille avant le décompte. La clé existe parce
+	 * que l'opération est irréversible et touche aussi les joueurs qui ne font qu'observer
+	 * ({@code BingoInventoryReset}).
+	 */
+	public static boolean clearInventoryOnStart = true;
+
+	/**
+	 * Bornes de la zone de départ tirée par l'option {@code teleport} de {@code /bingo start}, en
+	 * blocs depuis le spawn du monde ({@code BingoTeleport}).
+	 *
+	 * <p>Le défaut vise un terrain que personne n'a fouillé sans imposer un voyage de retour
+	 * impossible. Ce sont des <em>bornes</em> et non une distance fixe : un rayon unique ferait
+	 * atterrir toutes les manches sur le même cercle.
+	 */
+	public static int teleportMinDistance = 1500;
+
+	public static int teleportMaxDistance = 5000;
 
 	private BingoServerConfig() {
 	}
@@ -278,7 +300,12 @@ public final class BingoServerConfig {
 	}
 
 	/**
-	 * Les 11 clés serveur de `docs/05` §4.3, dans l'ordre du tableau du doc.
+	 * Les 11 clés serveur de `docs/05` §4.3, dans l'ordre du tableau du doc, suivies des 3 clés
+	 * ajoutées depuis (départ de manche : vidage d'inventaire et zone de téléportation).
+	 *
+	 * <p><strong>Écart avec `docs/05` §4.3</strong>, assumé : le doc décrit onze clés. Les trois
+	 * dernières viennent d'une demande postérieure et sont placées à la fin plutôt qu'insérées dans
+	 * l'ordre alphabétique, pour que la comparaison avec le tableau du doc reste ligne à ligne.
 	 *
 	 * <p>{@link LinkedHashMap} et non {@code Map.of} : {@code /bingo config list} doit se relire à
 	 * côté du doc, et une map à ordre d'itération non spécifié rendrait la comparaison pénible.
@@ -309,6 +336,14 @@ public final class BingoServerConfig {
 				() -> voiceEnabled, value -> voiceEnabled = value));
 		put(settings, new BoolSetting("announce_completions", false, true,
 				() -> announceCompletions, value -> announceCompletions = value));
+		put(settings, new BoolSetting("clear_inventory_on_start", false, true,
+				() -> clearInventoryOnStart, value -> clearInventoryOnStart = value));
+		// Bornes larges mais non nulles : la distance minimale peut valoir 0 (« n'importe où »), la
+		// maximale non — un intervalle [0, 0] ferait atterrir tout le monde sur le spawn.
+		put(settings, new IntSetting("teleport_min_distance", 0, 10_000_000, 1500,
+				() -> teleportMinDistance, value -> teleportMinDistance = value));
+		put(settings, new IntSetting("teleport_max_distance", 1, 10_000_000, 5000,
+				() -> teleportMaxDistance, value -> teleportMaxDistance = value));
 		return settings;
 	}
 

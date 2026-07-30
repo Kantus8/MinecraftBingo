@@ -27,11 +27,13 @@ import com.bingo.mod.util.BingoConstants;
 import com.bingo.mod.world.BingoPersistentState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,6 +109,21 @@ public final class BingoGame {
 	private long frozenAtMs;
 
 	private int timeLimitSeconds = BingoServerConfig.timeLimitSeconds;
+
+	/**
+	 * Zones de départ déjà tirées par l'option {@code teleport} de {@code /bingo start}.
+	 *
+	 * <p><strong>Seconde exception assumée</strong> à « rien n'est stocké en double », après
+	 * {@link PlayerPoints} : « une zone encore inexplorée » ne se dérive de rien. La carte précédente
+	 * n'existe plus, et Minecraft ne sait pas dire si un terrain a déjà été vu
+	 * ({@link BingoTeleport}). Cet historique est la seule mémoire qui empêche la manche 4 de
+	 * renvoyer tout le monde là où la manche 2 a déjà tout fouillé.
+	 *
+	 * <p>Survit à {@code stop}, {@code reroll}, {@code reset} et au redémarrage, pour la même raison
+	 * que les points individuels : un historique remis à zéro autorise à revisiter, ce qui est
+	 * exactement le défaut qu'il corrige.
+	 */
+	private final List<BlockPos> teleportAnchors = new ArrayList<>();
 
 	// ── Transitoire : jamais persisté ─────────────────────────────────────────
 
@@ -315,12 +332,43 @@ public final class BingoGame {
 		EMPTY_BOARD
 	}
 
-	/** Ce que {@code /bingo start} a produit, pour que la commande le restitue à l'opérateur. */
-	public record StartReport(StartResult result, List<String> warnings) {
+	/**
+	 * Ce que {@code /bingo start} a produit, pour que la commande le restitue à l'opérateur.
+	 *
+	 * @param teleportZone point d'arrivée retenu, vide si l'option n'a pas été demandée ou si aucune
+	 *                     zone n'a passé les critères de {@link BingoTeleport}. La distinction entre
+	 *                     les deux cas appartient à l'appelant, qui sait ce qu'il a demandé.
+	 */
+	public record StartReport(StartResult result, List<String> warnings, Optional<BlockPos> teleportZone) {
 
 		static StartReport failed(StartResult result) {
-			return new StartReport(result, List.of());
+			return new StartReport(result, List.of(), Optional.empty());
 		}
+
+		StartReport withTeleportZone(Optional<BlockPos> zone) {
+			return new StartReport(result, warnings, zone);
+		}
+	}
+
+	/**
+	 * Ce qu'un {@code /bingo start} fait <em>autour</em> du tirage.
+	 *
+	 * <p>Un record et non deux booléens en paramètres : {@code start(id, ruleset, false, true)} est un
+	 * appel qu'on inverse sans que rien ne le signale, et il y en aurait un de plus à chaque option
+	 * ajoutée.
+	 *
+	 * @param allowSingleTeam réservé au test solo ({@code /bingo debug solo}). La précondition de
+	 *                        `docs/05` §4.2 existe pour empêcher un opérateur de lancer une manche
+	 *                        sans adversaire par inadvertance — pas pour rendre le mod intestable à
+	 *                        un joueur. La contourner reste donc possible, mais seulement par un
+	 *                        chemin nommé, journalisé, et sous permission opérateur.
+	 * @param teleport        déplacement de tous les joueurs vers une zone vierge. Option de commande
+	 *                        et non clé de config : c'est une décision par manche, pas un réglage de
+	 *                        serveur — un opérateur veut pouvoir enchaîner une manche sur place.
+	 */
+	public record StartOptions(boolean allowSingleTeam, boolean teleport) {
+
+		public static final StartOptions DEFAULT = new StartOptions(false, false);
 	}
 
 	/**
@@ -330,24 +378,16 @@ public final class BingoGame {
 	 * dernières transitions étant pilotées par {@link #tick()}.
 	 */
 	public StartReport start(Identifier difficulty, Optional<Identifier> rulesetOverride) {
-		return start(difficulty, rulesetOverride, false);
+		return start(difficulty, rulesetOverride, StartOptions.DEFAULT);
 	}
 
-	/**
-	 * Variante de {@link #start} pouvant lever la précondition des deux équipes pourvues.
-	 *
-	 * @param allowSingleTeam réservé au test solo ({@code /bingo debug solo}). La précondition de
-	 *                        `docs/05` §4.2 existe pour empêcher un opérateur de lancer une manche
-	 *                        sans adversaire par inadvertance — pas pour rendre le mod intestable à
-	 *                        un joueur. La contourner reste donc possible, mais seulement par un
-	 *                        chemin nommé, journalisé, et sous permission opérateur.
-	 */
-	public StartReport start(Identifier difficulty, Optional<Identifier> rulesetOverride, boolean allowSingleTeam) {
+	/** Variante prenant les {@link StartOptions} du lancement. */
+	public StartReport start(Identifier difficulty, Optional<Identifier> rulesetOverride, StartOptions options) {
 		if (phase != GamePhase.LOBBY && phase != GamePhase.FINISHED) {
 			return StartReport.failed(StartResult.WRONG_PHASE);
 		}
 		if (teams.countStaffed() < 2) {
-			if (!allowSingleTeam) {
+			if (!options.allowSingleTeam()) {
 				return StartReport.failed(StartResult.NOT_ENOUGH_TEAMS);
 			}
 			BingoConstants.LOGGER.warn(
@@ -357,7 +397,52 @@ public final class BingoGame {
 		if (teams.count() < 1) {
 			return StartReport.failed(StartResult.NOT_ENOUGH_TEAMS);
 		}
-		return draw(difficulty, rulesetOverride);
+
+		StartReport report = draw(difficulty, rulesetOverride);
+		if (report.result() != StartResult.STARTED) {
+			return report;
+		}
+		return openRound(report, options);
+	}
+
+	/**
+	 * Ce qui arrive aux joueurs quand une manche est bel et bien lancée : table rase, puis départ.
+	 *
+	 * <p><strong>Après le tirage, jamais avant.</strong> Un tirage refusé faute d'objectifs (`docs/01`
+	 * §7) laisserait sinon derrière lui huit inventaires vidés et huit joueurs perdus à trois
+	 * kilomètres du spawn, pour une manche qui n'a pas commencé.
+	 *
+	 * <p>Absent de {@link #reroll()} sciemment : rerouler corrige une carte injouable, et faire
+	 * repartir tout le monde de zéro à chaque reroll transformerait un correctif en sanction.
+	 */
+	private StartReport openRound(StartReport report, StartOptions options) {
+		if (BingoServerConfig.clearInventoryOnStart) {
+			BingoInventoryReset.clearAll(this);
+		}
+		if (!options.teleport()) {
+			return report;
+		}
+
+		Optional<BlockPos> zone = BingoTeleport.relocateAll(this, teleportExclusions());
+		zone.ifPresent(anchor -> {
+			teleportAnchors.add(anchor);
+			markDirty();
+		});
+		return report.withTeleportZone(zone);
+	}
+
+	/**
+	 * Les points dont la prochaine zone de départ doit s'éloigner : manches précédentes, spawn du
+	 * monde, et position de chaque joueur.
+	 *
+	 * <p>Le spawn y figure même si la distance minimale l'exclut déjà : cette clé de config peut être
+	 * réglée à {@code 0}, et « n'importe où » ne doit pas vouloir dire « sur le spawn ».
+	 */
+	private List<BlockPos> teleportExclusions() {
+		List<BlockPos> exclusions = new ArrayList<>(teleportAnchors);
+		exclusions.add(server.getOverworld().getSpawnPos());
+		server.getPlayerManager().getPlayerList().forEach(player -> exclusions.add(player.getBlockPos()));
+		return exclusions;
 	}
 
 	/**
@@ -393,7 +478,7 @@ public final class BingoGame {
 		if (!drawn.isComplete()) {
 			BingoConstants.LOGGER.error("Tirage refusé : {} case(s) sur {} — {}",
 					drawn.tiles().size(), BingoBoard.TILE_COUNT, drawn.warnings());
-			return new StartReport(StartResult.EMPTY_BOARD, drawn.warnings());
+			return new StartReport(StartResult.EMPTY_BOARD, drawn.warnings(), Optional.empty());
 		}
 
 		tiles = drawn.tiles();
@@ -437,7 +522,7 @@ public final class BingoGame {
 			BingoServerNetworking.broadcastRollStart(this, rollDurationMs());
 		}
 
-		return new StartReport(StartResult.STARTED, List.copyOf(warnings));
+		return new StartReport(StartResult.STARTED, List.copyOf(warnings), Optional.empty());
 	}
 
 	/** {@code /bingo pause} — fige le chrono et suspend la validation (`docs/05` §4.2). */
@@ -1003,6 +1088,13 @@ public final class BingoGame {
 		nbt.putLong("savedAtMs", System.currentTimeMillis());
 		nbt.put("teams", teams.writeNbt());
 		nbt.put("playerPoints", playerPoints.writeNbt());
+
+		// Un NbtIntArray de 3 et non trois clés nommées : la liste est purement positionnelle, et une
+		// sous-compound par zone tripleraient la taille pour la même information.
+		NbtList anchors = new NbtList();
+		teleportAnchors.forEach(pos ->
+				anchors.add(new NbtIntArray(new int[] {pos.getX(), pos.getY(), pos.getZ()})));
+		nbt.put("teleportAnchors", anchors);
 		return nbt;
 	}
 
@@ -1032,6 +1124,19 @@ public final class BingoGame {
 		// totaux individuels ne dépendent d'aucun objectif, et un datapack amputé n'a aucune raison de
 		// les faire disparaître.
 		playerPoints.readNbt(nbt.getList("playerPoints", PlayerPoints.nbtEntryType()));
+
+		// Du même côté de la porte de dégradation que les points, et pour la même raison : l'historique
+		// des zones visitées ne dépend d'aucun objectif. Le perdre ferait revisiter au prochain start.
+		teleportAnchors.clear();
+		NbtList anchors = nbt.getList("teleportAnchors", NbtElement.INT_ARRAY_TYPE);
+		for (int i = 0; i < anchors.size(); i++) {
+			int[] xyz = anchors.getIntArray(i);
+			// Longueur vérifiée : un fichier tronqué ou écrit par une version antérieure ne doit pas
+			// lever d'ArrayIndexOutOfBounds au chargement du monde.
+			if (xyz.length == 3) {
+				teleportAnchors.add(new BlockPos(xyz[0], xyz[1], xyz[2]));
+			}
+		}
 
 		List<Objective> restored = new ArrayList<>();
 		List<String> missing = new ArrayList<>();

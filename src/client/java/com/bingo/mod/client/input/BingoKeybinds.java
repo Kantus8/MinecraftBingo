@@ -13,9 +13,16 @@ import org.lwjgl.glfw.GLFW;
 /**
  * Keybinds du mod (`docs/03` §5, tâche 2.14).
  *
- * <p>{@code B} est libre en vanilla 1.20.1. Le bind « Afficher/masquer le HUD » reste
- * <strong>non assigné</strong> par défaut : c'est un réglage qu'on change une fois, pas une action
- * de jeu, et occuper une touche pour ça priverait le joueur d'un raccourci utile.
+ * <p>{@code B} ouvre la carte et {@code H} masque le bingo — deux touches libres en vanilla 1.20.1.
+ *
+ * <p><strong>Revirement assumé sur {@code H}</strong> : la bascule du HUD était non assignée, au
+ * motif qu'un réglage qu'on change une fois ne mérite pas de confisquer une touche. C'est faux à
+ * l'usage — la grille occupe le coin haut-gauche, là où on regarde pour construire, et le joueur la
+ * masque puis la remontre plusieurs fois par manche. C'est une action de jeu.
+ *
+ * <p>Le tableau des équipes garde, lui, un bind non assigné : il est petit, ancré à droite et n'a
+ * jamais gêné personne. Deux touches pour masquer deux morceaux du même HUD demanderaient au joueur
+ * de retenir laquelle fait quoi.
  *
  * <p>« Parler à l'équipe » n'est pas ici : Simple Voice Chat gère déjà ses propres binds de groupe,
  * les dupliquer créerait deux touches pour un seul effet.
@@ -36,14 +43,16 @@ public final class BingoKeybinds {
 				GLFW.GLFW_KEY_B,
 				"key.categories.bingo"));
 
+		// H comme « hide » : libre en vanilla, et voisine immédiate du J et du K qu'aucun mod courant
+		// n'occupe non plus. Réassignable dans les options comme n'importe quel bind.
 		toggleHud = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 				"key.bingo.toggle_hud",
 				InputUtil.Type.KEYSYM,
-				InputUtil.UNKNOWN_KEY.getCode(),
+				GLFW.GLFW_KEY_H,
 				"key.categories.bingo"));
 
-		// Non assigné par défaut, comme la bascule du HUD et pour la même raison : le tableau des
-		// équipes est fait pour rester affiché, le masquer est un réglage qu'on change une fois.
+		// Non assigné, contrairement à la bascule du HUD : le tableau des équipes est fait pour rester
+		// affiché, et le masquer reste un réglage qu'on change une fois.
 		toggleTeamPanel = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 				"key.bingo.toggle_team_panel",
 				InputUtil.Type.KEYSYM,
