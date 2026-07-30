@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:bow"
+  },
+  "weight": 7,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:bow",
+    "name": {
+      "translate": "bingo.obj.craft.bow"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.bow.desc"
+    }
+  }
+}

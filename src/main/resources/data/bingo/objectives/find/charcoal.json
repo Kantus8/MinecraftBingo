@@ -1,0 +1,22 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:charcoal"
+  },
+  "count": 2,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:charcoal",
+    "name": {
+      "translate": "bingo.obj.find.charcoal"
+    },
+    "description": {
+      "translate": "bingo.obj.find.charcoal.desc"
+    },
+    "icon_count": 2
+  }
+}

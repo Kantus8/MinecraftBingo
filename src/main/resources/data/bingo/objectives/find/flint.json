@@ -1,0 +1,22 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:flint"
+  },
+  "count": 2,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:flint",
+    "name": {
+      "translate": "bingo.obj.find.flint"
+    },
+    "description": {
+      "translate": "bingo.obj.find.flint.desc"
+    },
+    "icon_count": 2
+  }
+}

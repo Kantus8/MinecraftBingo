@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:wooden_shovel"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:wooden_shovel",
+    "name": {
+      "translate": "bingo.obj.craft.wooden_shovel"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.wooden_shovel.desc"
+    }
+  }
+}

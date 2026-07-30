@@ -1,0 +1,23 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:coal"
+  },
+  "count": 10,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:mining"
+  ],
+  "display": {
+    "icon": "minecraft:coal",
+    "name": {
+      "translate": "bingo.obj.find.coal"
+    },
+    "description": {
+      "translate": "bingo.obj.find.coal.desc"
+    },
+    "icon_count": 10
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "type": "bingo:action",
+  "level": 1,
+  "target": {
+    "trigger": "bingo:advancement",
+    "params": {
+      "advancement": "minecraft:husbandry/smelt_style"
+    }
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:experimental"
+  ],
+  "display": {
+    "icon": "minecraft:cooked_cod",
+    "name": {
+      "translate": "bingo.obj.action.eat_cooked_fish"
+    },
+    "description": {
+      "translate": "bingo.obj.action.eat_cooked_fish.desc"
+    }
+  }
+}

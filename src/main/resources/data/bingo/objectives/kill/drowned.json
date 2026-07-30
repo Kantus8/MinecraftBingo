@@ -1,0 +1,23 @@
+{
+  "type": "bingo:kill_mob",
+  "level": 2,
+  "target": {
+    "entity_type": "minecraft:drowned"
+  },
+  "count": 2,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:combat"
+  ],
+  "display": {
+    "icon": "minecraft:drowned_spawn_egg",
+    "name": {
+      "translate": "bingo.obj.kill.drowned"
+    },
+    "description": {
+      "translate": "bingo.obj.kill.drowned.desc"
+    },
+    "icon_count": 2
+  }
+}

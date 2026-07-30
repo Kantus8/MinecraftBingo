@@ -1,0 +1,21 @@
+{
+  "type": "bingo:kill_mob",
+  "level": 1,
+  "target": {
+    "entity_type": "minecraft:squid"
+  },
+  "weight": 6,
+  "tags": [
+    "bingo:overworld",
+    "bingo:combat"
+  ],
+  "display": {
+    "icon": "minecraft:squid_spawn_egg",
+    "name": {
+      "translate": "bingo.obj.kill.squid"
+    },
+    "description": {
+      "translate": "bingo.obj.kill.squid.desc"
+    }
+  }
+}

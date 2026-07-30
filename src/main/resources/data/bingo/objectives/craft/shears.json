@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:shears"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:shears",
+    "name": {
+      "translate": "bingo.obj.craft.shears"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.shears.desc"
+    }
+  }
+}

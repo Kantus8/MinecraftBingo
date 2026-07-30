@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:red_dye"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:red_dye",
+    "name": {
+      "translate": "bingo.obj.craft.red_dye"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.red_dye.desc"
+    }
+  }
+}

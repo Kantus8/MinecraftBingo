@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:compass"
+  },
+  "weight": 7,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:compass",
+    "name": {
+      "translate": "bingo.obj.craft.compass"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.compass.desc"
+    }
+  }
+}

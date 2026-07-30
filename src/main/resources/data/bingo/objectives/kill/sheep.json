@@ -1,0 +1,21 @@
+{
+  "type": "bingo:kill_mob",
+  "level": 1,
+  "target": {
+    "entity_type": "minecraft:sheep"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:combat"
+  ],
+  "display": {
+    "icon": "minecraft:sheep_spawn_egg",
+    "name": {
+      "translate": "bingo.obj.kill.sheep"
+    },
+    "description": {
+      "translate": "bingo.obj.kill.sheep.desc"
+    }
+  }
+}

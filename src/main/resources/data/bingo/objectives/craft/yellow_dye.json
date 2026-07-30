@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:yellow_dye"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:yellow_dye",
+    "name": {
+      "translate": "bingo.obj.craft.yellow_dye"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.yellow_dye.desc"
+    }
+  }
+}

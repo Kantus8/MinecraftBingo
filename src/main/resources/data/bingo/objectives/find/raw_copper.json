@@ -1,0 +1,23 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:raw_copper"
+  },
+  "count": 12,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:mining"
+  ],
+  "display": {
+    "icon": "minecraft:raw_copper",
+    "name": {
+      "translate": "bingo.obj.find.raw_copper"
+    },
+    "description": {
+      "translate": "bingo.obj.find.raw_copper.desc"
+    },
+    "icon_count": 12
+  }
+}

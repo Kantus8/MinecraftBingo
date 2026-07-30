@@ -1,0 +1,20 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:apple"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:apple",
+    "name": {
+      "translate": "bingo.obj.find.apple"
+    },
+    "description": {
+      "translate": "bingo.obj.find.apple.desc"
+    }
+  }
+}

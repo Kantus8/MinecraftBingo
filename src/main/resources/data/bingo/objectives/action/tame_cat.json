@@ -1,0 +1,23 @@
+{
+  "type": "bingo:action",
+  "level": 2,
+  "target": {
+    "trigger": "bingo:tame_animal",
+    "params": {
+      "entity_type": "minecraft:cat"
+    }
+  },
+  "weight": 9,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:cod",
+    "name": {
+      "translate": "bingo.obj.action.tame_cat"
+    },
+    "description": {
+      "translate": "bingo.obj.action.tame_cat.desc"
+    }
+  }
+}

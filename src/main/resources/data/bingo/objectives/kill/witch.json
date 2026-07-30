@@ -1,0 +1,21 @@
+{
+  "type": "bingo:kill_mob",
+  "level": 2,
+  "target": {
+    "entity_type": "minecraft:witch"
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:combat"
+  ],
+  "display": {
+    "icon": "minecraft:witch_spawn_egg",
+    "name": {
+      "translate": "bingo.obj.kill.witch"
+    },
+    "description": {
+      "translate": "bingo.obj.kill.witch.desc"
+    }
+  }
+}

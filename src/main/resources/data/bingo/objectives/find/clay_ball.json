@@ -1,0 +1,22 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:clay_ball"
+  },
+  "count": 8,
+  "weight": 9,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:clay_ball",
+    "name": {
+      "translate": "bingo.obj.find.clay_ball"
+    },
+    "description": {
+      "translate": "bingo.obj.find.clay_ball.desc"
+    },
+    "icon_count": 8
+  }
+}

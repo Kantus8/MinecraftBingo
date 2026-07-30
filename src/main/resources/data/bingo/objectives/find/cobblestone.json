@@ -1,0 +1,23 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:cobblestone"
+  },
+  "count": 32,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:mining"
+  ],
+  "display": {
+    "icon": "minecraft:cobblestone",
+    "name": {
+      "translate": "bingo.obj.find.cobblestone"
+    },
+    "description": {
+      "translate": "bingo.obj.find.cobblestone.desc"
+    },
+    "icon_count": 32
+  }
+}

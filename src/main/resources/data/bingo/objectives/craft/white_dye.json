@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:white_dye"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:white_dye",
+    "name": {
+      "translate": "bingo.obj.craft.white_dye"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.white_dye.desc"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:light_gray_dye"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:light_gray_dye",
+    "name": {
+      "translate": "bingo.obj.craft.light_gray_dye"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.light_gray_dye.desc"
+    }
+  }
+}

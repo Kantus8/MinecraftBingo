@@ -1,0 +1,23 @@
+{
+  "type": "bingo:action",
+  "level": 1,
+  "target": {
+    "trigger": "bingo:advancement",
+    "params": {
+      "advancement": "minecraft:husbandry/fishy_business"
+    }
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:fishing_rod",
+    "name": {
+      "translate": "bingo.obj.action.fish_anything"
+    },
+    "description": {
+      "translate": "bingo.obj.action.fish_anything.desc"
+    }
+  }
+}

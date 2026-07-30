@@ -1,0 +1,21 @@
+{
+  "type": "bingo:death",
+  "level": 2,
+  "target": {
+    "damage_type": "minecraft:hot_floor"
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky"
+  ],
+  "display": {
+    "icon": "minecraft:magma_block",
+    "name": {
+      "translate": "bingo.obj.death.magma_block"
+    },
+    "description": {
+      "translate": "bingo.obj.death.magma_block.desc"
+    }
+  }
+}

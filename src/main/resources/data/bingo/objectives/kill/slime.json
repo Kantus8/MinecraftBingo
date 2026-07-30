@@ -1,0 +1,21 @@
+{
+  "type": "bingo:kill_mob",
+  "level": 2,
+  "target": {
+    "entity_type": "minecraft:slime"
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:combat"
+  ],
+  "display": {
+    "icon": "minecraft:slime_spawn_egg",
+    "name": {
+      "translate": "bingo.obj.kill.slime"
+    },
+    "description": {
+      "translate": "bingo.obj.kill.slime.desc"
+    }
+  }
+}

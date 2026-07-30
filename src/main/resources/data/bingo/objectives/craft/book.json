@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:book"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:book",
+    "name": {
+      "translate": "bingo.obj.craft.book"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.book.desc"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "bingo:death",
+  "level": 2,
+  "target": {
+    "damage_type": "minecraft:sweet_berry_bush"
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky"
+  ],
+  "display": {
+    "icon": "minecraft:sweet_berries",
+    "name": {
+      "translate": "bingo.obj.death.sweet_berry_bush"
+    },
+    "description": {
+      "translate": "bingo.obj.death.sweet_berry_bush.desc"
+    }
+  }
+}

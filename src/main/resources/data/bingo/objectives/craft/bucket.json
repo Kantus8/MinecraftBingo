@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:bucket"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:bucket",
+    "name": {
+      "translate": "bingo.obj.craft.bucket"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.bucket.desc"
+    }
+  }
+}

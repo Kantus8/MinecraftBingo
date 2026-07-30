@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:stone_pickaxe"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:stone_pickaxe",
+    "name": {
+      "translate": "bingo.obj.craft.stone_pickaxe"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.stone_pickaxe.desc"
+    }
+  }
+}

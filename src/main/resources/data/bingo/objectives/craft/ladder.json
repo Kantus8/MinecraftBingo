@@ -1,0 +1,23 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:ladder"
+  },
+  "count": 3,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:ladder",
+    "name": {
+      "translate": "bingo.obj.craft.ladder"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.ladder.desc"
+    },
+    "icon_count": 3
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:crossbow"
+  },
+  "weight": 9,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:crossbow",
+    "name": {
+      "translate": "bingo.obj.craft.crossbow"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.crossbow.desc"
+    }
+  }
+}

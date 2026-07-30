@@ -1,0 +1,22 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:sugar_cane"
+  },
+  "count": 3,
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:sugar_cane",
+    "name": {
+      "translate": "bingo.obj.find.sugar_cane"
+    },
+    "description": {
+      "translate": "bingo.obj.find.sugar_cane.desc"
+    },
+    "icon_count": 3
+  }
+}

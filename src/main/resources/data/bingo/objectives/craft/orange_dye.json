@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:orange_dye"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:orange_dye",
+    "name": {
+      "translate": "bingo.obj.craft.orange_dye"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.orange_dye.desc"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:glass"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:glass",
+    "name": {
+      "translate": "bingo.obj.craft.glass"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.glass.desc"
+    }
+  }
+}

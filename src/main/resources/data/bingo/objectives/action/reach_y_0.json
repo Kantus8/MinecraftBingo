@@ -1,0 +1,24 @@
+{
+  "type": "bingo:action",
+  "level": 2,
+  "target": {
+    "trigger": "bingo:reach_y_level",
+    "params": {
+      "y": 0
+    }
+  },
+  "weight": 9,
+  "tags": [
+    "bingo:overworld",
+    "bingo:mining"
+  ],
+  "display": {
+    "icon": "minecraft:deepslate",
+    "name": {
+      "translate": "bingo.obj.action.reach_y_0"
+    },
+    "description": {
+      "translate": "bingo.obj.action.reach_y_0.desc"
+    }
+  }
+}

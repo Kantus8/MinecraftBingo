@@ -1,0 +1,21 @@
+{
+  "type": "bingo:death",
+  "level": 1,
+  "target": {
+    "damage_type": "minecraft:cramming"
+  },
+  "weight": 8,
+  "tags": [
+    "bingo:overworld",
+    "bingo:risky"
+  ],
+  "display": {
+    "icon": "minecraft:slime_ball",
+    "name": {
+      "translate": "bingo.obj.death.cramming"
+    },
+    "description": {
+      "translate": "bingo.obj.death.cramming.desc"
+    }
+  }
+}

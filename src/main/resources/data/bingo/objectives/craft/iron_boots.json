@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 2,
+  "target": {
+    "item": "minecraft:iron_boots"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:iron_boots",
+    "name": {
+      "translate": "bingo.obj.craft.iron_boots"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.iron_boots.desc"
+    }
+  }
+}

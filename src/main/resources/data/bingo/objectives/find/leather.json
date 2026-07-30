@@ -1,0 +1,20 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:leather"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:leather",
+    "name": {
+      "translate": "bingo.obj.find.leather"
+    },
+    "description": {
+      "translate": "bingo.obj.find.leather.desc"
+    }
+  }
+}
