@@ -41,17 +41,29 @@ public record Objective(
 	/** Poids de tirage par défaut (`docs/01` §2). */
 	public static final int DEFAULT_WEIGHT = 10;
 
+	/** Niveau de difficulté le plus bas (`docs/01` §3). */
+	public static final int MIN_LEVEL = 1;
+
+	/**
+	 * Niveau de difficulté le plus haut (`docs/01` §3).
+	 *
+	 * <p>Référencé partout où un traitement itère sur les niveaux — codec, profils, tirage,
+	 * commandes de debug — pour qu'ouvrir un niveau supplémentaire reste une seule édition.
+	 */
+	public static final int MAX_LEVEL = 5;
+
 	/**
 	 * Codec d'un objectif dont l'ID est déjà connu.
 	 *
-	 * <p>Les règles de validation n°2 ({@code 1 <= level <= 4}) et n°4 ({@code count >= 1})
-	 * sont portées par {@link Codec#intRange} : une valeur hors bornes devient une erreur de
-	 * décodage, donc un objectif ignoré avec un WARN, sans code de vérification séparé.
+	 * <p>Les règles de validation n°2 ({@code MIN_LEVEL <= level <= MAX_LEVEL}) et n°4
+	 * ({@code count >= 1}) sont portées par {@link Codec#intRange} : une valeur hors bornes
+	 * devient une erreur de décodage, donc un objectif ignoré avec un WARN, sans code de
+	 * vérification séparé.
 	 */
 	public static Codec<Objective> codec(Identifier id) {
 		return RecordCodecBuilder.create(instance -> instance.group(
 				ObjectiveTarget.MAP_CODEC.forGetter(Objective::target),
-				Codec.intRange(1, 4).fieldOf("level").forGetter(Objective::level),
+				Codec.intRange(MIN_LEVEL, MAX_LEVEL).fieldOf("level").forGetter(Objective::level),
 				ObjectiveDisplay.CODEC.fieldOf("display").forGetter(Objective::display),
 				Codec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("weight", DEFAULT_WEIGHT).forGetter(Objective::weight),
 				Identifier.CODEC.listOf().optionalFieldOf("tags", List.of()).forGetter(Objective::tags),

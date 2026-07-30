@@ -37,7 +37,7 @@ Deux à quatre équipes de **deux joueurs** s'affrontent sur une **grille 5×5 p
 |---|---|---|
 Carte | **Une seule, partagée** par toutes les équipes | `01` §9 |
 Verrouillage de case | **Aucun** — chaque équipe coche sa propre grille sur les mêmes objectifs | `01` §9, `05` §1.2 |
-Difficulté | **Profil de distribution mixte** des 4 niveaux sur les 25 cases | `01` §7 |
+Difficulté | **Profil de distribution mixte** des 5 niveaux sur les 25 cases | `01` §7 |
 Victoire | Première ligne / colonne / diagonale — 12 combinaisons | `05` §1 |
 Score | `PointsBase × 2^(niveau−1)`, base 100, **ne décide pas de la victoire** | `05` §2 |
 Vocal en manche | Un groupe `Group.Type.OPEN` par équipe | `02` §1 |

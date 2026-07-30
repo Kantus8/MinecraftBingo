@@ -138,8 +138,9 @@ public final class ObjectiveLoader implements SimpleSynchronousResourceReloadLis
 	private void logSummary(int rejected) {
 		Map<ObjectiveType, Integer> byType = countByType();
 		StringBuilder levels = new StringBuilder();
-		for (int level = 1; level <= 4; level++) {
-			levels.append(level > 1 ? " / " : "").append(countByLevel(level)).append(" N").append(level);
+		for (int level = Objective.MIN_LEVEL; level <= Objective.MAX_LEVEL; level++) {
+			levels.append(level > Objective.MIN_LEVEL ? " / " : "")
+					.append(countByLevel(level)).append(" N").append(level);
 		}
 
 		BingoConstants.LOGGER.info("{} objectifs chargés ({}), révision {}",

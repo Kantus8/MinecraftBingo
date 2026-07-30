@@ -1,6 +1,7 @@
 package com.bingo.mod.data;
 
 import com.bingo.mod.board.BingoBoard;
+import com.bingo.mod.objective.Objective;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -14,7 +15,7 @@ import java.util.Optional;
 /**
  * Profil de distribution des niveaux sur les 25 cases (`docs/01` §7).
  *
- * @param distribution      niveau (1..4) → nombre de cases ; la somme doit valoir 25
+ * @param distribution      niveau (1..5) → nombre de cases ; la somme doit valoir 25
  * @param timeLimitSeconds  priorité maximale sur la durée de manche (`docs/01` §8)
  */
 public record DifficultyProfile(
@@ -28,15 +29,16 @@ public record DifficultyProfile(
 	/**
 	 * Les clés de {@code distribution} sont des chaînes en JSON ({@code "1"}, {@code "2"}…) :
 	 * un objet JSON n'a pas de clés entières. Ce codec les convertit tout en refusant celles
-	 * hors 1..4, ce qui transforme une coquille en erreur explicite plutôt qu'en niveau ignoré.
+	 * hors 1..5, ce qui transforme une coquille en erreur explicite plutôt qu'en niveau ignoré.
 	 */
 	private static final Codec<Integer> LEVEL_KEY_CODEC = Codec.STRING.comapFlatMap(
 			key -> {
 				try {
 					int level = Integer.parseInt(key);
-					return level >= 1 && level <= 4
+					return level >= Objective.MIN_LEVEL && level <= Objective.MAX_LEVEL
 							? DataResult.success(level)
-							: DataResult.error(() -> "Niveau hors bornes 1..4 : '" + key + "'");
+							: DataResult.error(() -> "Niveau hors bornes "
+									+ Objective.MIN_LEVEL + ".." + Objective.MAX_LEVEL + " : '" + key + "'");
 				} catch (NumberFormatException exception) {
 					return DataResult.error(() -> "Clé de niveau non numérique : '" + key + "'");
 				}

@@ -44,7 +44,7 @@ public final class BoardGenerator {
 		/** Distribution réellement obtenue, qui peut différer de la demandée après comblement. */
 		public Map<Integer, Integer> actualDistribution() {
 			Map<Integer, Integer> counts = new LinkedHashMap<>();
-			for (int level = 1; level <= 4; level++) {
+			for (int level = Objective.MIN_LEVEL; level <= Objective.MAX_LEVEL; level++) {
 				counts.put(level, 0);
 			}
 			tiles.forEach(objective -> counts.merge(objective.level(), 1, Integer::sum));
@@ -82,14 +82,14 @@ public final class BoardGenerator {
 		candidates.removeIf(candidate -> candidate.weight() <= 0);
 
 		Map<Integer, List<PoolResolver.Candidate>> byLevel = new LinkedHashMap<>();
-		for (int level = 1; level <= 4; level++) {
+		for (int level = Objective.MIN_LEVEL; level <= Objective.MAX_LEVEL; level++) {
 			byLevel.put(level, new ArrayList<>());
 		}
 		candidates.forEach(candidate -> byLevel.get(candidate.objective().level()).add(candidate));
 
 		List<Objective> picked = new ArrayList<>(BingoBoard.TILE_COUNT);
 
-		for (int level = 1; level <= 4; level++) {
+		for (int level = Objective.MIN_LEVEL; level <= Objective.MAX_LEVEL; level++) {
 			int wanted = profile.countFor(level);
 			int missing = drawFrom(byLevel.get(level), wanted, picked, random);
 
@@ -140,11 +140,12 @@ public final class BoardGenerator {
 	                                         List<Objective> picked,
 	                                         Random random) {
 		List<Integer> order = new ArrayList<>();
-		for (int distance = 1; distance <= 3; distance++) {
-			if (level - distance >= 1) {
+		int maxDistance = Objective.MAX_LEVEL - Objective.MIN_LEVEL;
+		for (int distance = 1; distance <= maxDistance; distance++) {
+			if (level - distance >= Objective.MIN_LEVEL) {
 				order.add(level - distance);
 			}
-			if (level + distance <= 4) {
+			if (level + distance <= Objective.MAX_LEVEL) {
 				order.add(level + distance);
 			}
 		}

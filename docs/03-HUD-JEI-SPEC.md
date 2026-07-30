@@ -256,7 +256,7 @@ Parler à l'équipe | non assigné | géré par Simple Voice Chat, pas par nous 
 `textures/gui/hud/panel.png` | 128×128 | Fond du panneau, 9-slice |
 `textures/gui/hud/cell.png` | 64×32 | Atlas : case normale · survolée · validée · dorée (4 × 18×18) |
 `textures/gui/hud/check.png` | 8×8 | Coche de validation |
-`textures/gui/icons/level_1..4.png` | 8×8 | Pastilles de niveau (optionnel, lot 4) |
+`textures/gui/icons/level_1..5.png` | 8×8 | Pastilles de niveau (optionnel, lot 4) |
 
 > ✅ **Livrées au lot 4**, avec deux écarts par rapport au tableau :
 >

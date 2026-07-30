@@ -835,7 +835,7 @@ public final class BingoCommand {
 		source.sendFeedback(() -> Text.translatable("bingo.command.debug.objectives.total",
 				Text.literal(String.valueOf(loader.size())).formatted(Formatting.AQUA)), false);
 
-		String levels = IntStream.rangeClosed(1, 4)
+		String levels = IntStream.rangeClosed(Objective.MIN_LEVEL, Objective.MAX_LEVEL)
 				.mapToObj(level -> "N" + level + " : " + loader.countByLevel(level))
 				.collect(Collectors.joining("  ·  "));
 		source.sendFeedback(() -> Text.translatable("bingo.command.debug.objectives.levels",
@@ -959,7 +959,7 @@ public final class BingoCommand {
 
 	private static Map<Integer, Integer> normalize(Map<Integer, Integer> distribution) {
 		Map<Integer, Integer> normalized = new LinkedHashMap<>();
-		for (int level = 1; level <= 4; level++) {
+		for (int level = Objective.MIN_LEVEL; level <= Objective.MAX_LEVEL; level++) {
 			normalized.put(level, distribution.getOrDefault(level, 0));
 		}
 		return normalized;

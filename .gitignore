@@ -39,3 +39,8 @@ desktop.ini
 # --- Secrets / publication -----------------------------------------
 *.env
 publish.properties
+
+# --- Outils ---------------------------------------------------------
+# Page régénérable par `python tools/objective-editor/build.py`, et qui
+# embarque un horodatage : la committer polluerait chaque diff.
+tools/objective-editor/objective-editor.html

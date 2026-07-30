@@ -30,7 +30,7 @@ Côté implémentation, `ResourceFinder`/`manager.findAllResources("objectives",
 {
   // ── Obligatoire ────────────────────────────────────────────────
   "type": "bingo:craft",        // CRAFT | FIND | KILL_MOB | DEATH | ACTION
-  "level": 2,                   // 1..4 — pilote le multiplicateur de score 2^(level-1)
+  "level": 2,                   // 1..5 — pilote le multiplicateur de score 2^(level-1)
   "target": { },                // charge utile spécifique au type (§4)
 
   // ── Affichage ──────────────────────────────────────────────────
@@ -63,7 +63,7 @@ Côté implémentation, `ResourceFinder`/`manager.findAllResources("objectives",
 ### Règles de validation au chargement (à implémenter, échec = objectif ignoré + log WARN)
 
 1. `type` appartient au registre des types connus.
-2. `1 <= level <= 4`.
+2. `1 <= level <= 5`.
 3. `display.icon` est un item existant dans le registre (sinon fallback `minecraft:barrier` + WARN).
 4. `count >= 1`.
 5. `target` valide le sous-schéma du `type` (§4).
@@ -73,7 +73,7 @@ Côté implémentation, `ResourceFinder`/`manager.findAllResources("objectives",
 
 ---
 
-## 3. Les 4 niveaux de difficulté
+## 3. Les 5 niveaux de difficulté
 
 | Niveau | Nom | Multiplicateur | Intention de design | Temps cible |
 |---|---|---|---|---|
@@ -81,8 +81,11 @@ Côté implémentation, `ResourceFinder`/`manager.findAllResources("objectives",
 | 2 | Standard | ×2 | Une boucle courte : miner, crafter, tuer un mob commun. | 2–8 min |
 | 3 | Engagé | ×4 | Nécessite un déplacement, une structure ou une ressource rare. | 8–20 min |
 | 4 | Extrême | ×8 | Nether/End, boss, ou chaîne de craft longue. Le pari risqué. | > 20 min |
+| 5 | — | ×16 | **Réservé, aucun objectif livré.** Palier ouvert pour les objectifs plus durs que N4. | — |
 
 Le **niveau n'est pas une estimation de temps** mais un contrat de score : viser la cohérence du multiplicateur, pas la précision du chrono.
+
+Le niveau 5 existe dans le schéma et dans le tirage, mais aucun objectif ni aucun profil livré ne l'utilise : les 4 profils déclarent `"5": 0`. Un profil qui demanderait des cases N5 sans objectif correspondant serait comblé par le niveau voisin avec un WARN, comme pour tout niveau sous-alimenté.
 
 ---
 
@@ -288,12 +291,12 @@ Résolution : `entries` ∪ (objectifs matchant `include_tags`) ∪ (pools de `i
 
 ### Les 4 profils livrés
 
-| Profil | N1 | N2 | N3 | N4 | Somme | Score max théorique* |
-|---|---|---|---|---|---|---|
-| `easy` | 12 | 9 | 4 | 0 | 25 | 4 600 |
-| `normal` | 8 | 9 | 6 | 2 | 25 | 6 600 |
-| `hard` | 4 | 8 | 9 | 4 | 25 | 8 800 |
-| `extreme` | 2 | 5 | 10 | 8 | 25 | 11 600 |
+| Profil | N1 | N2 | N3 | N4 | N5 | Somme | Score max théorique* |
+|---|---|---|---|---|---|---|---|
+| `easy` | 12 | 9 | 4 | 0 | 0 | 25 | 4 600 |
+| `normal` | 8 | 9 | 6 | 2 | 0 | 25 | 6 600 |
+| `hard` | 4 | 8 | 9 | 4 | 0 | 25 | 8 800 |
+| `extreme` | 2 | 5 | 10 | 8 | 0 | 25 | 11 600 |
 
 \* Somme de `100 × 2^(level-1)` sur les 25 cases. Sert au calibrage relatif, pas à un objectif de jeu (personne ne complète 25 cases).
 

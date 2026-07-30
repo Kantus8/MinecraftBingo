@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bingo — éditeur d'objectifs</title>
+<style>
+  :root {
+    --bg: #14161a;
+    --panel: #1c1f26;
+    --panel-2: #22262f;
+    --line: #2f3541;
+    --text: #e6e9ef;
+    --muted: #9aa3b2;
+    --accent: #6ea8fe;
+    --ok: #5dd39e;
+    --warn: #f2c14e;
+    --bad: #ef6f6c;
+    --n1: #5dd39e;
+    --n2: #8fd14f;
+    --n3: #f2c14e;
+    --n4: #ef8354;
+    --n5: #c678dd;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.5 "Segoe UI", system-ui, sans-serif;
+  }
+  header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  header h1 { margin: 0; font-size: 17px; font-weight: 600; }
+  header .meta { color: var(--muted); font-size: 12px; }
+  header .spacer { flex: 1; }
+  nav { display: flex; gap: 4px; padding: 0 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  nav button {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    padding: 10px 14px;
+    font: inherit;
+    cursor: pointer;
+  }
+  nav button:hover { color: var(--text); }
+  nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+  nav button .badge {
+    display: inline-block;
+    min-width: 18px;
+    padding: 0 5px;
+    margin-left: 6px;
+    border-radius: 9px;
+    background: var(--accent);
+    color: #10141c;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+  }
+  nav button .badge.zero { display: none; }
+  main { padding: 20px; max-width: 1500px; }
+  section.tab { display: none; }
+  section.tab.active { display: block; }
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  input, select, textarea, button.btn {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 9px;
+    font: inherit;
+  }
+  input:focus, select:focus, textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  textarea { width: 100%; resize: vertical; font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+  button.btn { cursor: pointer; }
+  button.btn:hover { border-color: var(--accent); }
+  button.btn.primary { background: var(--accent); color: #10141c; border-color: var(--accent); font-weight: 600; }
+  button.btn.danger { border-color: var(--bad); color: var(--bad); }
+  button.btn.ghost { background: none; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 7px 9px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  th {
+    position: sticky;
+    top: 96px;
+    background: var(--panel);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    z-index: 10;
+  }
+  th.nosort { cursor: default; }
+  tbody tr:hover { background: #1a1d24; }
+  tr.dirty { background: #1b2430 !important; }
+  tr.deleted { opacity: .45; }
+  tr.deleted .name { text-decoration: line-through; }
+  code, .mono { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+  .id { color: var(--muted); font-size: 12px; }
+  .name { font-weight: 500; }
+  .pill {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 11.5px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .lvl { font-weight: 700; }
+  .lvl-1 { color: var(--n1); } .lvl-2 { color: var(--n2); } .lvl-3 { color: var(--n3); }
+  .lvl-4 { color: var(--n4); } .lvl-5 { color: var(--n5); }
+  select.level { width: 62px; font-weight: 700; }
+  input.num { width: 62px; }
+  input.note { width: 100%; min-width: 160px; }
+  .was { color: var(--warn); font-size: 11.5px; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .card h2, .card h3 { margin: 0 0 12px; font-size: 15px; }
+  .grid { display: grid; gap: 12px; }
+  .grid.c2 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .grid.c3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  label.field { display: block; }
+  label.field > span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  label.field > span .req { color: var(--bad); }
+  label.field input, label.field select, label.field textarea { width: 100%; }
+  label.check { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  label.check input { width: auto; }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 4px; }
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; }
+  .stat {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 86px;
+  }
+  .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .stat .v { font-size: 19px; font-weight: 700; }
+  .stat .d { font-size: 11.5px; color: var(--warn); }
+  .msg { padding: 9px 12px; border-radius: 8px; font-size: 13px; margin-bottom: 10px; }
+  .msg.ok { background: #17301f; border: 1px solid #2c5a3c; color: var(--ok); }
+  .msg.warn { background: #322a14; border: 1px solid #5f4e1e; color: var(--warn); }
+  .msg.bad { background: #331c1c; border: 1px solid #5e2d2b; color: var(--bad); }
+  .msg.info { background: #1a2534; border: 1px solid #2c4560; color: var(--accent); }
+  .dist { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .dist label { text-align: center; }
+  .dist label > span { display: block; font-size: 11px; color: var(--muted); }
+  .dist input { width: 58px; text-align: center; font-weight: 700; }
+  .sum { font-weight: 700; padding: 6px 10px; border-radius: 6px; }
+  .sum.ok { color: var(--ok); }
+  .sum.bad { color: var(--bad); }
+  .newlist { display: grid; gap: 10px; }
+  .newitem {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .newitem .grow { flex: 1; min-width: 200px; }
+  .tagbox { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tagbox label { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  .empty { color: var(--muted); padding: 24px; text-align: center; }
+  .tools-right { display: flex; gap: 8px; }
+  @media (max-width: 720px) {
+    th { top: 0; position: static; }
+    main { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Bingo — éditeur d'objectifs</h1>
+  <span class="meta" id="snapshot-meta"></span>
+  <span class="spacer"></span>
+  <span class="meta" id="autosave-meta"></span>
+  <button class="btn ghost" id="btn-reset">Tout réinitialiser</button>
+</header>
+
+<nav>
+  <button data-tab="objectives" class="active">Objectifs <span class="badge zero" id="badge-obj">0</span></button>
+  <button data-tab="new">Nouveaux objectifs <span class="badge zero" id="badge-new">0</span></button>
+  <button data-tab="profiles">Profils de difficulté <span class="badge zero" id="badge-prof">0</span></button>
+  <button data-tab="export">Export <span class="badge zero" id="badge-total">0</span></button>
+</nav>
+
+<main>
+
+  <!-- ══════════════ Objectifs ══════════════ -->
+  <section class="tab active" id="tab-objectives">
+    <div class="card">
+      <h3>Répartition par niveau</h3>
+      <div class="stats" id="level-stats"></div>
+      <div class="hint">Le niveau pilote le multiplicateur de score : <code>points_base × 2^(niveau-1)</code>.
+        Niveau 5 = ×16, ouvert et vide pour l'instant.</div>
+    </div>
+
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Rechercher (nom, id, item…)" style="min-width:260px">
+      <select id="filter-type"><option value="">Tous les types</option></select>
+      <select id="filter-level"><option value="">Tous les niveaux</option></select>
+      <select id="filter-tag"><option value="">Tous les tags</option></select>
+      <label class="check"><input type="checkbox" id="filter-dirty"> Modifiés seulement</label>
+      <span class="spacer" style="flex:1"></span>
+      <span class="meta" id="row-count"></span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="name">Objectif</th>
+          <th data-sort="type">Type</th>
+          <th data-sort="level" style="width:130px">Niveau</th>
+          <th data-sort="weight" style="width:100px">Poids</th>
+          <th data-sort="count" style="width:100px">Count</th>
+          <th class="nosort">Note pour Claude</th>
+          <th class="nosort" style="width:80px"></th>
+        </tr>
+      </thead>
+      <tbody id="obj-rows"></tbody>
+    </table>
+  </section>
+
+  <!-- ══════════════ Nouveaux ══════════════ -->
+  <section class="tab" id="tab-new">
+    <div class="card">
+      <h3>Nouvel objectif</h3>
+      <div class="grid c3">
+        <label class="field"><span>Type <span class="req">*</span></span>
+          <select id="n-type"></select></label>
+        <label class="field"><span>Dossier / nom du fichier <span class="req">*</span></span>
+          <input id="n-path" placeholder="find/netherite_ingot"></label>
+        <label class="field"><span>Niveau <span class="req">*</span></span>
+          <select id="n-level"></select></label>
+        <label class="field"><span>Poids (défaut 10)</span>
+          <input id="n-weight" type="number" min="0" value="10"></label>
+        <label class="field"><span>Count (défaut 1)</span>
+          <input id="n-count" type="number" min="1" value="1"></label>
+        <label class="field"><span>Icône (item) <span class="req">*</span></span>
+          <input id="n-icon" placeholder="minecraft:netherite_ingot"></label>
+      </div>
+
+      <h3 style="margin-top:18px">Cible (<span id="n-target-type">—</span>)</h3>
+      <div class="grid c3" id="n-target-fields"></div>
+
+      <h3 style="margin-top:18px">Textes affichés</h3>
+      <div class="grid c2">
+        <label class="field"><span>Nom (fr) <span class="req">*</span></span>
+          <input id="n-name-fr" placeholder="Obtenir un lingot de netherite"></label>
+        <label class="field"><span>Nom (en)</span>
+          <input id="n-name-en" placeholder="Obtain a netherite ingot"></label>
+        <label class="field"><span>Description (fr)</span>
+          <input id="n-desc-fr" placeholder="Quatre débris antiques et quatre lingots d'or."></label>
+        <label class="field"><span>Description (en)</span>
+          <input id="n-desc-en" placeholder="Four ancient debris and four gold ingots."></label>
+      </div>
+
+      <h3 style="margin-top:18px">Tags</h3>
+      <div class="tagbox" id="n-tags"></div>
+      <label class="field" style="margin-top:8px"><span>Tags supplémentaires (séparés par des virgules)</span>
+        <input id="n-tags-extra" placeholder="bingo:experimental"></label>
+
+      <details style="margin-top:16px">
+        <summary>Options avancées</summary>
+        <div class="grid c3" style="margin-top:12px">
+          <label class="field"><span>requires_dimension</span>
+            <input id="n-dim" placeholder="minecraft:the_nether"></label>
+          <label class="field"><span>conflicts (ids séparés par des virgules)</span>
+            <input id="n-conflicts" placeholder="bingo:find/diamond"></label>
+          <label class="field"><span>points_base (surcharge)</span>
+            <input id="n-points" type="number" placeholder="défaut : ruleset"></label>
+        </div>
+        <div style="margin-top:10px"><label class="check"><input type="checkbox" id="n-announce" checked> announce (annonce publique à la complétion)</label></div>
+      </details>
+
+      <label class="field" style="margin-top:14px"><span>Note libre pour Claude</span>
+        <textarea id="n-note" rows="2" placeholder="ex. : ajouter aussi un trigger bingo:smelt_item, il n'existe pas encore"></textarea></label>
+
+      <div class="toolbar" style="margin-top:14px; margin-bottom:0">
+        <button class="btn primary" id="n-add">Ajouter à la liste</button>
+        <button class="btn ghost" id="n-clear">Vider le formulaire</button>
+        <span id="n-error" style="color:var(--bad); font-size:13px"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Objectifs à créer (<span id="n-list-count">0</span>)</h3>
+      <div class="newlist" id="n-list"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ Profils ══════════════ -->
+  <section class="tab" id="tab-profiles">
+    <div class="msg info">La somme de la distribution doit valoir exactement 25 — un profil hors somme est refusé au chargement.
+      Le tirage comble un niveau sous-alimenté par le niveau voisin, mais avec un WARN.</div>
+    <div id="profile-cards"></div>
+  </section>
+
+  <!-- ══════════════ Export ══════════════ -->
+  <section class="tab" id="tab-export">
+    <div class="card">
+      <h3>Brief à coller dans Claude Code</h3>
+      <div id="export-summary" class="stats" style="margin-bottom:12px"></div>
+      <div class="toolbar">
+        <button class="btn primary" id="btn-copy-brief">Copier le brief</button>
+        <button class="btn" id="btn-copy-json">Copier le JSON seul</button>
+        <button class="btn" id="btn-download">Télécharger .md</button>
+        <span id="copy-feedback" style="color:var(--ok); font-size:13px"></span>
+      </div>
+      <textarea id="export-text" rows="26" spellcheck="false"></textarea>
+    </div>
+
+    <div class="card">
+      <h3>Reprendre un brief précédent</h3>
+      <div class="hint">Colle ici le bloc JSON d'un export précédent pour recharger tes modifications en cours.</div>
+      <textarea id="import-text" rows="5" spellcheck="false" placeholder='{"level_changes": …}'></textarea>
+      <div class="toolbar" style="margin-bottom:0; margin-top:10px">
+        <button class="btn" id="btn-import">Importer</button>
+        <span id="import-feedback" style="font-size:13px"></span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+"use strict";
+
+const DATA = /*__BINGO_DATA__*/ null;
+
+/* ══════════════════════════════════════════════════════════════════
+   État — tout ce que l'utilisateur a changé, indexé par id d'objectif.
+   Persisté dans localStorage : un rechargement accidentel ne perd rien.
+   ══════════════════════════════════════════════════════════════════ */
+
+const STORAGE_KEY = "bingo-objective-editor-v1";
+
+const EMPTY_STATE = {
+  overrides: {},   // id -> {level?, weight?, count?, note?}
+  deletions: [],   // ids
+  created: [],     // objets complets
+  profiles: {},    // nom -> {distribution:{lvl:n}, time_limit_seconds?, note?}
+  seq: 1
+};
+
+let state = load();
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return Object.assign(structuredClone(EMPTY_STATE), JSON.parse(raw));
+  } catch (e) { /* état corrompu : on repart propre plutôt que de casser la page */ }
+  return structuredClone(EMPTY_STATE);
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  document.getElementById("autosave-meta").textContent =
+    "sauvegardé localement · " + new Date().toLocaleTimeString("fr-FR");
+}
+
+const OBJ_BY_ID = new Map(DATA.objectives.map(o => [o.id, o]));
+
+/** Valeur effective d'un champ : la surcharge si elle existe, sinon la valeur du datapack. */
+function eff(objective, field) {
+  const over = state.overrides[objective.id];
+  return over && over[field] !== undefined && over[field] !== null ? over[field] : objective[field];
+}
+
+function isDirty(objective) {
+  const over = state.overrides[objective.id];
+  if (state.deletions.includes(objective.id)) return true;
+  if (!over) return false;
+  return ["level", "weight", "count"].some(f => over[f] !== undefined && over[f] !== objective[f])
+      || (over.note || "").trim() !== "";
+}
+
+function setOverride(id, field, value) {
+  const objective = OBJ_BY_ID.get(id);
+  const over = state.overrides[id] || (state.overrides[id] = {});
+  // Ranger une valeur identique à l'originale serait un faux « modifié » dans le brief.
+  if (value === objective[field] || value === "" || value === null) delete over[field];
+  else over[field] = value;
+  if (Object.keys(over).length === 0) delete state.overrides[id];
+  save();
+  renderAll();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Onglets
+   ══════════════════════════════════════════════════════════════════ */
+
+document.querySelectorAll("nav button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll("section.tab").forEach(s => s.classList.remove("active"));
+    button.classList.add("active");
+    document.getElementById("tab-" + button.dataset.tab).classList.add("active");
+    if (button.dataset.tab === "export") renderExport();
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   Onglet Objectifs
+   ══════════════════════════════════════════════════════════════════ */
+
+let sortKey = "level";
+let sortDir = 1;
+
+const els = {
+  search: document.getElementById("search"),
+  filterType: document.getElementById("filter-type"),
+  filterLevel: document.getElementById("filter-level"),
+  filterTag: document.getElementById("filter-tag"),
+  filterDirty: document.getElementById("filter-dirty"),
+  rows: document.getElementById("obj-rows"),
+  rowCount: document.getElementById("row-count")
+};
+
+function fillFilters() {
+  DATA.types.forEach(type => els.filterType.add(new Option(type, type)));
+  for (let level = DATA.levels.min; level <= DATA.levels.max; level++) {
+    els.filterLevel.add(new Option("Niveau " + level, String(level)));
+  }
+  DATA.tags.forEach(tag => els.filterTag.add(new Option(tag, tag)));
+  document.getElementById("snapshot-meta").textContent =
+    DATA.objectives.length + " objectifs · " + DATA.profiles.length + " profils · instantané du " + DATA.generated_at;
+}
+
+function visibleObjectives() {
+  const query = els.search.value.trim().toLowerCase();
+  return DATA.objectives.filter(objective => {
+    if (els.filterType.value && objective.type !== els.filterType.value) return false;
+    if (els.filterLevel.value && String(eff(objective, "level")) !== els.filterLevel.value) return false;
+    if (els.filterTag.value && !objective.tags.includes(els.filterTag.value)) return false;
+    if (els.filterDirty.checked && !isDirty(objective)) return false;
+    if (!query) return true;
+    return [objective.id, objective.name_fr, objective.name_en, JSON.stringify(objective.target), objective.icon]
+      .join(" ").toLowerCase().includes(query);
+  }).sort((a, b) => {
+    const pick = objective => sortKey === "name" ? (objective.name_fr || objective.id)
+      : sortKey === "type" ? objective.type
+      : eff(objective, sortKey);
+    const va = pick(a), vb = pick(b);
+    if (va === vb) return a.id.localeCompare(b.id);
+    return (va > vb ? 1 : -1) * sortDir;
+  });
+}
+
+function renderRows() {
+  const list = visibleObjectives();
+  els.rowCount.textContent = list.length + " / " + DATA.objectives.length + " affichés";
+  els.rows.innerHTML = "";
+
+  if (list.length === 0) {
+    els.rows.innerHTML = '<tr><td colspan="7" class="empty">Aucun objectif ne correspond aux filtres.</td></tr>';
+    return;
+  }
+
+  for (const objective of list) {
+    const over = state.overrides[objective.id] || {};
+    const deleted = state.deletions.includes(objective.id);
+    const row = document.createElement("tr");
+    if (isDirty(objective)) row.classList.add("dirty");
+    if (deleted) row.classList.add("deleted");
+
+    const level = eff(objective, "level");
+    const levelOptions = [];
+    for (let l = DATA.levels.min; l <= DATA.levels.max; l++) {
+      levelOptions.push(`<option value="${l}"${l === level ? " selected" : ""}>N${l}</option>`);
+    }
+
+    row.innerHTML = `
+      <td>
+        <div class="name">${escapeHtml(objective.name_fr || objective.id)}</div>
+        <div class="id mono">${objective.id}</div>
+      </td>
+      <td><span class="pill">${objective.type.replace("bingo:", "")}</span></td>
+      <td>
+        <select class="level lvl-${level}" data-field="level">${levelOptions.join("")}</select>
+        ${over.level !== undefined ? `<div class="was">était N${objective.level}</div>` : ""}
+      </td>
+      <td>
+        <input class="num" type="number" min="0" data-field="weight" value="${eff(objective, "weight")}">
+        ${over.weight !== undefined ? `<div class="was">était ${objective.weight}</div>` : ""}
+      </td>
+      <td>
+        <input class="num" type="number" min="1" data-field="count" value="${eff(objective, "count")}">
+        ${over.count !== undefined ? `<div class="was">était ${objective.count}</div>` : ""}
+      </td>
+      <td><input class="note" data-field="note" value="${escapeHtml(over.note || "")}"
+                 placeholder="ex. : passer à 5 diamants"></td>
+      <td>
+        <button class="btn ghost ${deleted ? "danger" : ""}" data-action="delete"
+                title="${deleted ? "Annuler la suppression" : "Marquer pour suppression"}">${deleted ? "↺" : "🗑"}</button>
+      </td>`;
+
+    row.querySelector('[data-field="level"]').addEventListener("change", event =>
+      setOverride(objective.id, "level", Number(event.target.value)));
+
+    row.querySelectorAll('input[data-field="weight"], input[data-field="count"]').forEach(input => {
+      input.addEventListener("change", event => {
+        const value = event.target.value === "" ? null : Number(event.target.value);
+        setOverride(objective.id, event.target.dataset.field, value);
+      });
+    });
+
+    // Une note se tape caractère par caractère : re-rendre à chaque frappe ferait perdre le focus.
+    const note = row.querySelector('input[data-field="note"]');
+    note.addEventListener("input", event => {
+      const over2 = state.overrides[objective.id] || (state.overrides[objective.id] = {});
+      const text = event.target.value;
+      if (text.trim() === "") delete over2.note; else over2.note = text;
+      if (Object.keys(over2).length === 0) delete state.overrides[objective.id];
+      save();
+      renderCounters();
+      row.classList.toggle("dirty", isDirty(objective));
+    });
+
+    row.querySelector('[data-action="delete"]').addEventListener("click", () => {
+      const index = state.deletions.indexOf(objective.id);
+      if (index >= 0) state.deletions.splice(index, 1);
+      else state.deletions.push(objective.id);
+      save();
+      renderAll();
+    });
+
+    els.rows.appendChild(row);
+  }
+}
+
+document.querySelectorAll("th[data-sort]").forEach(header => {
+  header.addEventListener("click", () => {
+    const key = header.dataset.sort;
+    sortDir = sortKey === key ? -sortDir : 1;
+    sortKey = key;
+    renderRows();
+  });
+});
+
+[els.search, els.filterType, els.filterLevel, els.filterTag, els.filterDirty]
+  .forEach(input => input.addEventListener("input", renderRows));
+
+/* ══════════════════════════════════════════════════════════════════
+   Statistiques de niveau — l'écart avant/après est ce qui compte,
+   c'est lui qui dit si un profil devient intirable.
+   ══════════════════════════════════════════════════════════════════ */
+
+function levelCounts() {
+  const before = {}, after = {};
+  for (let l = DATA.levels.min; l <= DATA.levels.max; l++) { before[l] = 0; after[l] = 0; }
+  for (const objective of DATA.objectives) {
+    before[objective.level]++;
+    if (!state.deletions.includes(objective.id)) after[eff(objective, "level")]++;
+  }
+  for (const created of state.created) after[created.level]++;
+  return { before, after };
+}
+
+function renderLevelStats() {
+  const { before, after } = levelCounts();
+  const container = document.getElementById("level-stats");
+  container.innerHTML = "";
+  for (let l = DATA.levels.min; l <= DATA.levels.max; l++) {
+    const delta = after[l] - before[l];
+    const node = document.createElement("div");
+    node.className = "stat";
+    node.innerHTML = `<div class="k">Niveau ${l} · ×${Math.pow(2, l - 1)}</div>
+      <div class="v lvl-${l}">${after[l]}</div>
+      <div class="d">${delta === 0 ? "&nbsp;" : (delta > 0 ? "+" : "") + delta + " vs " + before[l]}</div>`;
+    container.appendChild(node);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Onglet Nouveaux objectifs
+   ══════════════════════════════════════════════════════════════════ */
+
+const TARGET_SCHEMAS = {
+  "bingo:craft": [
+    { key: "item", label: "item (ou tag)", placeholder: "minecraft:iron_pickaxe", required: true },
+    { key: "tag", label: "tag d'items (alternative à item)", placeholder: "#minecraft:planks" },
+    { key: "match_nbt", label: "match_nbt", type: "bool" }
+  ],
+  "bingo:find": [
+    { key: "item", label: "item (ou tag)", placeholder: "minecraft:diamond", required: true },
+    { key: "tag", label: "tag d'items (alternative à item)", placeholder: "#minecraft:logs" },
+    { key: "match_nbt", label: "match_nbt", type: "bool" }
+  ],
+  "bingo:kill_mob": [
+    { key: "entity_type", label: "entity_type (ou tag)", placeholder: "minecraft:blaze", required: true },
+    { key: "tag", label: "tag d'entités (alternative)", placeholder: "#minecraft:skeletons" },
+    { key: "require_weapon", label: "require_weapon", placeholder: "minecraft:bow" },
+    { key: "max_distance", label: "max_distance", type: "number", placeholder: "30" }
+  ],
+  "bingo:death": [
+    { key: "damage_type", label: "damage_type (ou damage_tag)", placeholder: "minecraft:lava", required: true },
+    { key: "damage_tag", label: "damage_tag (alternative)", placeholder: "#minecraft:is_fire" },
+    { key: "any_death", label: "any_death", type: "bool" }
+  ],
+  "bingo:action": [
+    { key: "trigger", label: "trigger", type: "trigger", required: true },
+    { key: "params", label: "params (JSON)", type: "json", placeholder: '{"min_level": 1}' }
+  ]
+};
+
+const nEls = {};
+["type", "path", "level", "weight", "count", "icon", "name-fr", "name-en", "desc-fr", "desc-en",
+ "tags-extra", "dim", "conflicts", "points", "announce", "note", "error", "list", "list-count",
+ "target-fields", "target-type", "tags"]
+  .forEach(key => nEls[key] = document.getElementById("n-" + key));
+
+function initNewForm() {
+  DATA.types.forEach(type => nEls.type.add(new Option(type, type)));
+  for (let l = DATA.levels.min; l <= DATA.levels.max; l++) {
+    nEls.level.add(new Option("Niveau " + l, String(l)));
+  }
+  nEls.level.value = String(DATA.levels.max);
+  DATA.tags.forEach(tag => {
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="checkbox" value="${tag}"> ${tag}`;
+    nEls.tags.appendChild(label);
+  });
+  nEls.type.addEventListener("change", renderTargetFields);
+  renderTargetFields();
+}
+
+function renderTargetFields() {
+  const type = nEls.type.value;
+  nEls["target-type"].textContent = type;
+  nEls["target-fields"].innerHTML = "";
+  for (const field of TARGET_SCHEMAS[type] || []) {
+    const label = document.createElement("label");
+    label.className = "field";
+    const req = field.required ? ' <span class="req">*</span>' : "";
+    if (field.type === "bool") {
+      label.className = "check";
+      label.innerHTML = `<input type="checkbox" data-target="${field.key}"> ${field.label}`;
+    } else if (field.type === "trigger") {
+      const options = DATA.triggers.map(t => `<option value="${t}">${t}</option>`).join("");
+      label.innerHTML = `<span>${field.label}${req}</span>
+        <select data-target="${field.key}">${options}</select>`;
+    } else if (field.type === "json") {
+      label.innerHTML = `<span>${field.label}</span>
+        <textarea rows="2" data-target="${field.key}" placeholder='${field.placeholder || ""}'></textarea>`;
+    } else {
+      label.innerHTML = `<span>${field.label}${req}</span>
+        <input data-target="${field.key}" type="${field.type === "number" ? "number" : "text"}"
+               placeholder="${field.placeholder || ""}">`;
+    }
+    nEls["target-fields"].appendChild(label);
+  }
+}
+
+function collectTarget() {
+  const target = {};
+  for (const input of nEls["target-fields"].querySelectorAll("[data-target]")) {
+    const key = input.dataset.target;
+    if (input.type === "checkbox") {
+      if (input.checked) target[key] = true;
+    } else if (input.value.trim() !== "") {
+      const raw = input.value.trim();
+      if (key === "params") {
+        try { target[key] = JSON.parse(raw); }
+        catch (e) { throw new Error("params n'est pas du JSON valide : " + e.message); }
+      } else if (key === "max_distance") {
+        target[key] = Number(raw);
+      } else if (key === "tag" || key === "damage_tag") {
+        target[key] = raw.replace(/^#/, "");
+      } else {
+        target[key] = raw;
+      }
+    }
+  }
+  return target;
+}
+
+nEls.type.value = DATA.types[0];
+
+document.getElementById("n-add").addEventListener("click", () => {
+  nEls.error.textContent = "";
+  try {
+    const path = nEls.path.value.trim().replace(/^\/+|\.json$/g, "");
+    if (!path.includes("/")) throw new Error("le chemin doit être de la forme dossier/nom, ex. find/netherite_ingot");
+    if (!nEls.icon.value.trim()) throw new Error("l'icône est obligatoire");
+    if (!nEls["name-fr"].value.trim()) throw new Error("le nom français est obligatoire");
+
+    const target = collectTarget();
+    const required = (TARGET_SCHEMAS[nEls.type.value] || []).filter(f => f.required);
+    // Les cibles à alternative (item|tag) sont valides dès qu'une des deux clés est là.
+    if (required.length && !required.some(f => target[f.key] !== undefined)
+        && !(target.tag || target.damage_tag)) {
+      throw new Error("renseigne " + required.map(f => f.key).join(" ou "));
+    }
+
+    const tags = Array.from(nEls.tags.querySelectorAll("input:checked")).map(i => i.value)
+      .concat(nEls["tags-extra"].value.split(",").map(t => t.trim()).filter(Boolean));
+
+    state.created.push({
+      key: "new-" + (state.seq++),
+      path,
+      id: "bingo:" + path,
+      file: "src/main/resources/data/bingo/objectives/" + path + ".json",
+      type: nEls.type.value,
+      level: Number(nEls.level.value),
+      weight: Number(nEls.weight.value || 10),
+      count: Number(nEls.count.value || 1),
+      icon: nEls.icon.value.trim(),
+      target,
+      tags: Array.from(new Set(tags)),
+      name_fr: nEls["name-fr"].value.trim(),
+      name_en: nEls["name-en"].value.trim(),
+      desc_fr: nEls["desc-fr"].value.trim(),
+      desc_en: nEls["desc-en"].value.trim(),
+      requires_dimension: nEls.dim.value.trim(),
+      conflicts: nEls.conflicts.value.split(",").map(t => t.trim()).filter(Boolean),
+      points_base: nEls.points.value === "" ? null : Number(nEls.points.value),
+      announce: nEls.announce.checked,
+      note: nEls.note.value.trim()
+    });
+
+    save();
+    clearNewForm();
+    renderAll();
+  } catch (error) {
+    nEls.error.textContent = error.message;
+  }
+});
+
+function clearNewForm() {
+  ["path", "icon", "name-fr", "name-en", "desc-fr", "desc-en", "tags-extra", "dim", "conflicts", "points", "note"]
+    .forEach(key => nEls[key].value = "");
+  nEls.weight.value = 10;
+  nEls.count.value = 1;
+  nEls.announce.checked = true;
+  nEls.tags.querySelectorAll("input").forEach(input => input.checked = false);
+  renderTargetFields();
+}
+
+document.getElementById("n-clear").addEventListener("click", clearNewForm);
+
+function renderNewList() {
+  nEls["list-count"].textContent = state.created.length;
+  nEls.list.innerHTML = "";
+  if (state.created.length === 0) {
+    nEls.list.innerHTML = '<div class="empty">Aucun objectif en attente de création.</div>';
+    return;
+  }
+  for (const created of state.created) {
+    const node = document.createElement("div");
+    node.className = "newitem";
+    node.innerHTML = `
+      <span class="lvl lvl-${created.level}">N${created.level}</span>
+      <span class="pill">${created.type.replace("bingo:", "")}</span>
+      <div class="grow">
+        <div class="name">${escapeHtml(created.name_fr)}</div>
+        <div class="id mono">${created.id} · ${escapeHtml(JSON.stringify(created.target))}</div>
+      </div>
+      <button class="btn ghost danger">Retirer</button>`;
+    node.querySelector("button").addEventListener("click", () => {
+      state.created = state.created.filter(other => other.key !== created.key);
+      save();
+      renderAll();
+    });
+    nEls.list.appendChild(node);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Onglet Profils
+   ══════════════════════════════════════════════════════════════════ */
+
+function profileDist(profile) {
+  const override = state.profiles[profile.name];
+  const dist = {};
+  for (let l = DATA.levels.min; l <= DATA.levels.max; l++) {
+    dist[l] = override && override.distribution && override.distribution[l] !== undefined
+      ? override.distribution[l]
+      : (profile.distribution[l] || 0);
+  }
+  return dist;
+}
+
+function profileDirty(profile) {
+  const dist = profileDist(profile);
+  const changed = Object.keys(dist).some(l => dist[l] !== (profile.distribution[l] || 0));
+  const override = state.profiles[profile.name] || {};
+  return changed
+    || (override.time_limit_seconds !== undefined && override.time_limit_seconds !== profile.time_limit_seconds)
+    || (override.note || "").trim() !== "";
+}
+
+function renderProfiles() {
+  const container = document.getElementById("profile-cards");
+  const { after } = levelCounts();
+  container.innerHTML = "";
+
+  for (const profile of DATA.profiles) {
+    const dist = profileDist(profile);
+    const sum = Object.values(dist).reduce((a, b) => a + b, 0);
+    const override = state.profiles[profile.name] || {};
+    const time = override.time_limit_seconds !== undefined ? override.time_limit_seconds : profile.time_limit_seconds;
+    const maxScore = Object.keys(dist).reduce((total, l) => total + dist[l] * DATA.points_base * Math.pow(2, l - 1), 0);
+
+    const inputs = [];
+    for (let l = DATA.levels.min; l <= DATA.levels.max; l++) {
+      const short = after[l] < dist[l];
+      inputs.push(`<label><span class="lvl-${l}">N${l} ${short ? "⚠" : ""}</span>
+        <input type="number" min="0" max="25" data-level="${l}" value="${dist[l]}"
+               style="${short ? "border-color:var(--warn)" : ""}"></label>`);
+    }
+
+    const shortages = [];
+    for (let l = DATA.levels.min; l <= DATA.levels.max; l++) {
+      if (dist[l] > after[l]) shortages.push(`N${l} : ${dist[l]} demandé(s) pour ${after[l]} objectif(s) disponible(s)`);
+    }
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <h3>${escapeHtml(profile.display_fr || profile.name)} <span class="id mono">· ${profile.file}</span>
+        ${profileDirty(profile) ? '<span class="pill" style="color:var(--accent);border-color:var(--accent)">modifié</span>' : ""}</h3>
+      <div class="dist">
+        ${inputs.join("")}
+        <span class="sum ${sum === DATA.tile_count ? "ok" : "bad"}">Σ ${sum} / ${DATA.tile_count}</span>
+        <label><span>Durée (s)</span><input type="number" min="1" data-time="1" value="${time ?? ""}" style="width:90px"></label>
+        <span class="pill">score max ${maxScore.toLocaleString("fr-FR")}</span>
+      </div>
+      ${sum !== DATA.tile_count ? `<div class="msg bad" style="margin-top:10px">La somme doit valoir ${DATA.tile_count}, sinon le profil est refusé au chargement.</div>` : ""}
+      ${shortages.length ? `<div class="msg warn" style="margin-top:10px">Pool insuffisant — ${shortages.join(" · ")}. Le tirage comblera avec le niveau voisin (WARN).</div>` : ""}
+      <label class="field" style="margin-top:10px"><span>Note pour Claude</span>
+        <input data-note="1" value="${escapeHtml(override.note || "")}" placeholder="ex. : extreme doit devenir 0/2/8/10/5"></label>`;
+
+    card.querySelectorAll("input[data-level]").forEach(input => {
+      input.addEventListener("change", event => {
+        const bucket = state.profiles[profile.name] || (state.profiles[profile.name] = {});
+        bucket.distribution = bucket.distribution || {};
+        bucket.distribution[event.target.dataset.level] = Number(event.target.value || 0);
+        save();
+        renderAll();
+      });
+    });
+
+    card.querySelector("input[data-time]").addEventListener("change", event => {
+      const bucket = state.profiles[profile.name] || (state.profiles[profile.name] = {});
+      bucket.time_limit_seconds = event.target.value === "" ? undefined : Number(event.target.value);
+      save();
+      renderAll();
+    });
+
+    const noteInput = card.querySelector("input[data-note]");
+    noteInput.addEventListener("input", event => {
+      const bucket = state.profiles[profile.name] || (state.profiles[profile.name] = {});
+      if (event.target.value.trim() === "") delete bucket.note; else bucket.note = event.target.value;
+      save();
+      renderCounters();
+    });
+
+    container.appendChild(card);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   Export — le brief est le vrai livrable : c'est ce texte qui part
+   dans Claude Code, donc il doit être auto-suffisant.
+   ══════════════════════════════════════════════════════════════════ */
+
+function changeSet() {
+  const levelChanges = [], fieldChanges = [], notes = [];
+
+  for (const objective of DATA.objectives) {
+    const over = state.overrides[objective.id];
+    if (!over) continue;
+    if (over.level !== undefined && over.level !== objective.level) {
+      levelChanges.push({ id: objective.id, file: objective.file, name: objective.name_fr,
+        from: objective.level, to: over.level });
+    }
+    for (const field of ["weight", "count"]) {
+      if (over[field] !== undefined && over[field] !== objective[field]) {
+        fieldChanges.push({ id: objective.id, file: objective.file, field,
+          from: objective[field], to: over[field] });
+      }
+    }
+    if ((over.note || "").trim()) {
+      notes.push({ id: objective.id, file: objective.file, name: objective.name_fr, note: over.note.trim() });
+    }
+  }
+
+  const { after } = levelCounts();
+  const profileChanges = DATA.profiles.filter(profileDirty).map(profile => {
+    const dist = profileDist(profile);
+    const override = state.profiles[profile.name] || {};
+    const shortages = Object.keys(dist)
+      .filter(level => dist[level] > after[level])
+      .map(level => ({ level: Number(level), wanted: dist[level], available: after[level] }));
+    return {
+      name: profile.name,
+      file: profile.file,
+      shortages,
+      distribution_from: Object.fromEntries(
+        Object.keys(dist).map(l => [l, profile.distribution[l] || 0])),
+      distribution_to: dist,
+      sum: Object.values(dist).reduce((a, b) => a + b, 0),
+      time_limit_from: profile.time_limit_seconds ?? null,
+      time_limit_to: override.time_limit_seconds !== undefined
+        ? override.time_limit_seconds : (profile.time_limit_seconds ?? null),
+      note: (override.note || "").trim() || null
+    };
+  });
+
+  const deletions = state.deletions.map(id => {
+    const objective = OBJ_BY_ID.get(id);
+    return { id, file: objective.file, name: objective.name_fr };
+  });
+
+  return {
+    schema: "bingo-objective-editor/1",
+    snapshot: DATA.generated_at,
+    level_changes: levelChanges,
+    field_changes: fieldChanges,
+    notes,
+    new_objectives: state.created,
+    profile_changes: profileChanges,
+    deletions
+  };
+}
+
+function changeCount(set) {
+  return set.level_changes.length + set.field_changes.length + set.notes.length
+    + set.new_objectives.length + set.profile_changes.length + set.deletions.length;
+}
+
+/** Le JSON de l'objectif tel qu'il devra atterrir dans le datapack. */
+function objectiveJson(created) {
+  const path = created.path.replace(/\//g, ".");
+  const json = {
+    type: created.type,
+    level: created.level,
+    target: created.target
+  };
+  if (created.count !== 1) json.count = created.count;
+  if (created.weight !== 10) json.weight = created.weight;
+  if (created.tags.length) json.tags = created.tags;
+  if (created.conflicts.length) json.conflicts = created.conflicts;
+  if (created.requires_dimension) json.requires_dimension = created.requires_dimension;
+  if (created.points_base !== null && created.points_base !== undefined) json.points_base = created.points_base;
+  if (created.announce === false) json.announce = false;
+  json.display = {
+    icon: created.icon,
+    name: { translate: "bingo.obj." + path },
+    description: { translate: "bingo.obj." + path + ".desc" }
+  };
+  if (created.count > 1) json.display.icon_count = created.count;
+  return json;
+}
+
+function buildBrief() {
+  const set = changeSet();
+  const total = changeCount(set);
+  const lines = [];
+
+  lines.push("# Brief de modification du bingo");
+  lines.push("");
+  lines.push(`Généré par \`tools/objective-editor\` depuis l'instantané du ${DATA.generated_at}.`);
+  lines.push(`${total} changement(s) demandé(s). Applique-les au datapack et au code, puis vérifie que ça compile.`);
+  lines.push("");
+
+  if (total === 0) {
+    lines.push("_Aucun changement pour l'instant._");
+    return lines.join("\n");
+  }
+
+  if (set.level_changes.length) {
+    lines.push("## 1. Changements de niveau");
+    lines.push("");
+    lines.push("| Objectif | Fichier | Actuel | Nouveau |");
+    lines.push("|---|---|---|---|");
+    for (const change of set.level_changes) {
+      lines.push(`| ${change.name || change.id} (\`${change.id}\`) | \`${change.file}\` | N${change.from} | **N${change.to}** |`);
+    }
+    lines.push("");
+  }
+
+  if (set.field_changes.length) {
+    lines.push("## 2. Autres champs");
+    lines.push("");
+    lines.push("| Objectif | Champ | Actuel | Nouveau |");
+    lines.push("|---|---|---|---|");
+    for (const change of set.field_changes) {
+      lines.push(`| \`${change.id}\` | \`${change.field}\` | ${change.from} | **${change.to}** |`);
+    }
+    lines.push("");
+    lines.push("> Rappel : si `count` change, `display.icon_count` doit suivre, et le texte `bingo.obj.*` " +
+      "qui annonce la quantité aussi (fr_fr et en_us).");
+    lines.push("");
+  }
+
+  if (set.notes.length) {
+    lines.push("## 3. Demandes libres par objectif");
+    lines.push("");
+    for (const note of set.notes) {
+      lines.push(`- **${note.name || note.id}** (\`${note.id}\`, \`${note.file}\`) — ${note.note}`);
+    }
+    lines.push("");
+  }
+
+  if (set.new_objectives.length) {
+    lines.push("## 4. Nouveaux objectifs à créer");
+    lines.push("");
+    for (const created of set.new_objectives) {
+      const path = created.path.replace(/\//g, ".");
+      lines.push(`### \`${created.id}\` — niveau ${created.level}`);
+      lines.push("");
+      lines.push(`Fichier à créer : \`${created.file}\``);
+      lines.push("");
+      lines.push("```json");
+      lines.push(JSON.stringify(objectiveJson(created), null, 2));
+      lines.push("```");
+      lines.push("");
+      lines.push("Clés de langue à ajouter :");
+      lines.push("");
+      lines.push("```json");
+      lines.push(`// assets/bingo/lang/fr_fr.json`);
+      lines.push(`"bingo.obj.${path}": ${JSON.stringify(created.name_fr)},`);
+      lines.push(`"bingo.obj.${path}.desc": ${JSON.stringify(created.desc_fr || "")}`);
+      lines.push(`// assets/bingo/lang/en_us.json`);
+      lines.push(`"bingo.obj.${path}": ${JSON.stringify(created.name_en || created.name_fr)},`);
+      lines.push(`"bingo.obj.${path}.desc": ${JSON.stringify(created.desc_en || created.desc_fr || "")}`);
+      lines.push("```");
+      // Recopier le français dans en_us serait un bug silencieux : mieux vaut le dire.
+      const missing = [];
+      if (!created.name_en) missing.push("le nom");
+      if (created.desc_fr && !created.desc_en) missing.push("la description");
+      if (missing.length) {
+        lines.push("");
+        lines.push(`⚠ Traduction anglaise manquante pour ${missing.join(" et ")} : ` +
+          "le bloc `en_us` ci-dessus reprend le français, traduis-le.");
+      }
+      if (created.note) {
+        lines.push("");
+        lines.push(`**Note** : ${created.note}`);
+      }
+      lines.push("");
+    }
+  }
+
+  if (set.profile_changes.length) {
+    lines.push("## 5. Profils de difficulté");
+    lines.push("");
+    for (const change of set.profile_changes) {
+      const from = Object.keys(change.distribution_from).map(l => change.distribution_from[l]).join(" / ");
+      const to = Object.keys(change.distribution_to).map(l => change.distribution_to[l]).join(" / ");
+      lines.push(`### \`${change.name}\` — \`${change.file}\``);
+      lines.push("");
+      lines.push(`- distribution (N1…N${DATA.levels.max}) : ${from} → **${to}** (somme ${change.sum}${change.sum === DATA.tile_count ? "" : " ⚠ doit valoir " + DATA.tile_count})`);
+      if (change.time_limit_to !== change.time_limit_from) {
+        lines.push(`- time_limit_seconds : ${change.time_limit_from} → **${change.time_limit_to}**`);
+      }
+      if (change.note) lines.push(`- note : ${change.note}`);
+      for (const shortage of change.shortages) {
+        lines.push(`- ⚠ N${shortage.level} : ${shortage.wanted} case(s) demandée(s) pour ` +
+          `${shortage.available} objectif(s) de ce niveau (créations incluses) — ` +
+          "le tirage comblera par le niveau voisin avec un WARN. Prévoir des objectifs de ce niveau.");
+      }
+      lines.push("");
+    }
+  }
+
+  if (set.deletions.length) {
+    lines.push("## 6. Objectifs à supprimer");
+    lines.push("");
+    for (const deletion of set.deletions) {
+      lines.push(`- \`${deletion.id}\` — \`${deletion.file}\` (${deletion.name || ""}) ` +
+        "— supprimer aussi ses clés de langue et toute référence dans `conflicts`.");
+    }
+    lines.push("");
+  }
+
+  lines.push("---");
+  lines.push("");
+  lines.push("<details><summary>Change set brut (à recoller dans l'outil pour reprendre l'édition)</summary>");
+  lines.push("");
+  lines.push("```json");
+  lines.push(JSON.stringify(set, null, 2));
+  lines.push("```");
+  lines.push("");
+  lines.push("</details>");
+
+  return lines.join("\n");
+}
+
+function renderExport() {
+  const set = changeSet();
+  const summary = document.getElementById("export-summary");
+  const entries = [
+    ["Niveaux", set.level_changes.length],
+    ["Champs", set.field_changes.length],
+    ["Notes", set.notes.length],
+    ["Créations", set.new_objectives.length],
+    ["Profils", set.profile_changes.length],
+    ["Suppressions", set.deletions.length]
+  ];
+  summary.innerHTML = entries.map(([key, value]) =>
+    `<div class="stat"><div class="k">${key}</div><div class="v">${value}</div></div>`).join("");
+  document.getElementById("export-text").value = buildBrief();
+}
+
+function copy(text, target) {
+  navigator.clipboard.writeText(text).then(() => {
+    const feedback = document.getElementById(target);
+    feedback.textContent = "Copié.";
+    setTimeout(() => feedback.textContent = "", 2000);
+  }).catch(() => {
+    document.getElementById(target).textContent = "Copie refusée par le navigateur — sélectionne le texte à la main.";
+  });
+}
+
+document.getElementById("btn-copy-brief").addEventListener("click", () =>
+  copy(buildBrief(), "copy-feedback"));
+
+document.getElementById("btn-copy-json").addEventListener("click", () =>
+  copy(JSON.stringify(changeSet(), null, 2), "copy-feedback"));
+
+document.getElementById("btn-download").addEventListener("click", () => {
+  const blob = new Blob([buildBrief()], { type: "text/markdown;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "bingo-brief.md";
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+document.getElementById("btn-import").addEventListener("click", () => {
+  const feedback = document.getElementById("import-feedback");
+  const raw = document.getElementById("import-text").value.trim();
+  try {
+    // Le brief complet colle du markdown autour du JSON : on récupère le premier objet équilibré.
+    const start = raw.indexOf("{");
+    const end = raw.lastIndexOf("}");
+    if (start < 0 || end < start) throw new Error("aucun objet JSON trouvé");
+    const set = JSON.parse(raw.slice(start, end + 1));
+
+    const fresh = structuredClone(EMPTY_STATE);
+    (set.level_changes || []).forEach(change => {
+      (fresh.overrides[change.id] = fresh.overrides[change.id] || {}).level = change.to;
+    });
+    (set.field_changes || []).forEach(change => {
+      (fresh.overrides[change.id] = fresh.overrides[change.id] || {})[change.field] = change.to;
+    });
+    (set.notes || []).forEach(note => {
+      (fresh.overrides[note.id] = fresh.overrides[note.id] || {}).note = note.note;
+    });
+    fresh.created = set.new_objectives || [];
+    fresh.seq = fresh.created.length + 1;
+    fresh.deletions = (set.deletions || []).map(deletion => deletion.id);
+    (set.profile_changes || []).forEach(change => {
+      fresh.profiles[change.name] = {
+        distribution: change.distribution_to,
+        time_limit_seconds: change.time_limit_to ?? undefined,
+        note: change.note || undefined
+      };
+    });
+
+    state = fresh;
+    save();
+    renderAll();
+    renderExport();
+    feedback.style.color = "var(--ok)";
+    feedback.textContent = changeCount(changeSet()) + " changement(s) rechargé(s).";
+  } catch (error) {
+    feedback.style.color = "var(--bad)";
+    feedback.textContent = "Import impossible : " + error.message;
+  }
+});
+
+document.getElementById("btn-reset").addEventListener("click", () => {
+  if (!confirm("Effacer toutes les modifications en cours ?")) return;
+  state = structuredClone(EMPTY_STATE);
+  save();
+  renderAll();
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   Rendu
+   ══════════════════════════════════════════════════════════════════ */
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g,
+    char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+
+function renderCounters() {
+  const set = changeSet();
+  const badges = {
+    "badge-obj": set.level_changes.length + set.field_changes.length + set.notes.length + set.deletions.length,
+    "badge-new": set.new_objectives.length,
+    "badge-prof": set.profile_changes.length,
+    "badge-total": changeCount(set)
+  };
+  for (const [id, value] of Object.entries(badges)) {
+    const badge = document.getElementById(id);
+    badge.textContent = value;
+    badge.classList.toggle("zero", value === 0);
+  }
+}
+
+function renderAll() {
+  renderLevelStats();
+  renderRows();
+  renderNewList();
+  renderProfiles();
+  renderCounters();
+  if (document.getElementById("tab-export").classList.contains("active")) renderExport();
+}
+
+fillFilters();
+initNewForm();
+renderAll();
+</script>
+</body>
+</html>
