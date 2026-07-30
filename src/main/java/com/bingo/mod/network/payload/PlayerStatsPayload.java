@@ -33,7 +33,13 @@ public record PlayerStatsPayload(List<Entry> players) {
 	 */
 	static final int MAX_PLAYERS = 512;
 
-	/** Longueur maximale d'un nom lu du réseau — 16 en vanilla, 32 pour tout serveur exotique. */
+	/**
+	 * Longueur maximale d'un nom — 16 en vanilla, 32 pour laisser de la marge.
+	 *
+	 * <p>Appliquée à l'<strong>écriture</strong> autant qu'à la lecture : un nom trop long lèverait
+	 * côté client, sur le thread réseau, donc déconnecterait le joueur avec un message qui ne désigne
+	 * rien. Tronqué, il reste lisible dans le tableau et personne ne quitte la partie.
+	 */
 	private static final int MAX_NAME_LENGTH = 32;
 
 	public record Entry(UUID player, String name, int points) {
@@ -54,8 +60,12 @@ public record PlayerStatsPayload(List<Entry> players) {
 
 	public static PlayerStatsPayload of(PlayerPoints points) {
 		return new PlayerStatsPayload(points.entries().stream()
-				.map(entry -> new Entry(entry.player(), entry.name(), entry.points()))
+				.map(entry -> new Entry(entry.player(), clampName(entry.name()), entry.points()))
 				.toList());
+	}
+
+	private static String clampName(String name) {
+		return name.length() <= MAX_NAME_LENGTH ? name : name.substring(0, MAX_NAME_LENGTH);
 	}
 
 	public void write(PacketByteBuf buf) {
