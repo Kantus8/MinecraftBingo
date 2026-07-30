@@ -416,9 +416,10 @@ public final class BingoGame {
 	 * repartir tout le monde de zéro à chaque reroll transformerait un correctif en sanction.
 	 */
 	private StartReport openRound(StartReport report, StartOptions options) {
-		if (BingoServerConfig.clearInventoryOnStart) {
-			BingoInventoryReset.clearAll(this);
-		}
+		// Inventaire, niveaux et succès : les trois clés de config sont lues dans BingoPlayerReset, qui
+		// n'envoie qu'un message récapitulatif au lieu d'un par remise à zéro.
+		BingoPlayerReset.applyAll(this);
+
 		if (!options.teleport()) {
 			return report;
 		}

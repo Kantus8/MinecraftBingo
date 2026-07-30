@@ -35,7 +35,7 @@ import java.util.function.IntSupplier;
  * <p>Les champs restent {@code public static} : ils sont lus directement par {@code BingoGame}, et
  * les cacher derrière des accesseurs qui ne feraient rien serait du bruit. {@link #settings()} en
  * donne une vue par clé, qui est ce dont {@code /bingo config} a besoin — un {@code switch} sur
- * quatorze noms de clés dans la commande aurait dupliqué les bornes et les défauts.
+ * seize noms de clés dans la commande aurait dupliqué les bornes et les défauts.
  *
  * <p>Les clés {@code hud_*} de `docs/05` §4.3 n'y figurent pas : elles sont <em>client</em> et
  * vivent dans {@code config/bingo-client.json} (tâche 4.13).
@@ -92,9 +92,26 @@ public final class BingoServerConfig {
 	 * <p>À {@code true} par défaut : une manche se joue à égalité de matériel, et un joueur qui arrive
 	 * avec un coffre d'obsidienne coche la moitié de la grille avant le décompte. La clé existe parce
 	 * que l'opération est irréversible et touche aussi les joueurs qui ne font qu'observer
-	 * ({@code BingoInventoryReset}).
+	 * ({@code BingoPlayerReset}).
 	 */
 	public static boolean clearInventoryOnStart = true;
+
+	/**
+	 * Remise à zéro des niveaux d'expérience au lancement d'une manche.
+	 *
+	 * <p>Même intention que le vidage d'inventaire : 30 niveaux conservés valident « enchanter un
+	 * objet » avant le premier coup de pioche.
+	 */
+	public static boolean resetLevelsOnStart = true;
+
+	/**
+	 * Révocation de tous les succès au lancement d'une manche.
+	 *
+	 * <p>À {@code true} par défaut parce que c'est une <strong>condition de jouabilité</strong> et pas
+	 * un réglage d'équité : les objectifs {@code bingo:advancement} se détectent à l'octroi du succès,
+	 * donc un joueur qui l'a déjà ne pourra jamais valider la case ({@code BingoPlayerReset}).
+	 */
+	public static boolean resetAdvancementsOnStart = true;
 
 	/**
 	 * Bornes de la zone de départ tirée par l'option {@code teleport} de {@code /bingo start}, en
@@ -300,11 +317,11 @@ public final class BingoServerConfig {
 	}
 
 	/**
-	 * Les 11 clés serveur de `docs/05` §4.3, dans l'ordre du tableau du doc, suivies des 3 clés
-	 * ajoutées depuis (départ de manche : vidage d'inventaire et zone de téléportation).
+	 * Les 11 clés serveur de `docs/05` §4.3, dans l'ordre du tableau du doc, suivies des 5 clés
+	 * ajoutées depuis (départ de manche : table rase des joueurs et zone de téléportation).
 	 *
-	 * <p><strong>Écart avec `docs/05` §4.3</strong>, assumé : le doc décrit onze clés. Les trois
-	 * dernières viennent d'une demande postérieure et sont placées à la fin plutôt qu'insérées dans
+	 * <p><strong>Écart avec `docs/05` §4.3</strong>, assumé : le doc décrit onze clés. Les cinq
+	 * dernières viennent de demandes postérieures et sont placées à la fin plutôt qu'insérées dans
 	 * l'ordre alphabétique, pour que la comparaison avec le tableau du doc reste ligne à ligne.
 	 *
 	 * <p>{@link LinkedHashMap} et non {@code Map.of} : {@code /bingo config list} doit se relire à
@@ -338,6 +355,10 @@ public final class BingoServerConfig {
 				() -> announceCompletions, value -> announceCompletions = value));
 		put(settings, new BoolSetting("clear_inventory_on_start", false, true,
 				() -> clearInventoryOnStart, value -> clearInventoryOnStart = value));
+		put(settings, new BoolSetting("reset_levels_on_start", false, true,
+				() -> resetLevelsOnStart, value -> resetLevelsOnStart = value));
+		put(settings, new BoolSetting("reset_advancements_on_start", false, true,
+				() -> resetAdvancementsOnStart, value -> resetAdvancementsOnStart = value));
 		// Bornes larges mais non nulles : la distance minimale peut valoir 0 (« n'importe où »), la
 		// maximale non — un intervalle [0, 0] ferait atterrir tout le monde sur le spawn.
 		put(settings, new IntSetting("teleport_min_distance", 0, 10_000_000, 1500,
