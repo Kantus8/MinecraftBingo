@@ -1,0 +1,1 @@
+cd "C:\JeuxC\Minecraft Bingo Mod Github\MinecraftBingo" && .\gradlew build
