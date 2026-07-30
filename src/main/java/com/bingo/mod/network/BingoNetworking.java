@@ -50,6 +50,15 @@ public final class BingoNetworking {
 	/** Changement de composition d'équipe. */
 	public static final Identifier TEAM_SYNC = BingoConstants.id("team_sync");
 
+	/**
+	 * Noms et points cumulés des joueurs, pour le tableau des équipes.
+	 *
+	 * <p>Canal distinct de {@link #SCORE_UPDATE} bien que les deux partent souvent ensemble : celui-ci
+	 * porte un total individuel qui traverse les manches, celui-là le score d'équipe dérivé de la
+	 * carte courante. Les fusionner obligerait à réémettre l'un chaque fois que l'autre change.
+	 */
+	public static final Identifier PLAYER_STATS = BingoConstants.id("player_stats");
+
 	/** Demande d'ouverture de l'écran de carte ({@code /bingo card}). */
 	public static final Identifier OPEN_BOARD = BingoConstants.id("open_board");
 

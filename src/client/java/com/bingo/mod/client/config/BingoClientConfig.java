@@ -50,6 +50,15 @@ public final class BingoClientConfig {
 		int hud_margin_y = 8;
 		float hud_scale = 1.0f;
 		boolean hud_visible = true;
+
+		/**
+		 * Tableau des équipes, ancré en haut à <em>droite</em> : ses marges se comptent depuis le bord
+		 * droit, contrairement à {@code hud_margin_x}. Il partage {@code hud_scale} — deux échelles
+		 * indépendantes pour deux panneaux du même HUD n'aideraient personne.
+		 */
+		int team_panel_margin_x = 8;
+		int team_panel_margin_y = 8;
+		boolean team_panel_visible = true;
 	}
 
 	private static Path path() {
@@ -112,6 +121,19 @@ public final class BingoClientConfig {
 		return values.hud_visible;
 	}
 
+	/** Marge <strong>droite</strong> du tableau des équipes. */
+	public static int teamPanelMarginX() {
+		return values.team_panel_margin_x;
+	}
+
+	public static int teamPanelMarginY() {
+		return values.team_panel_margin_y;
+	}
+
+	public static boolean teamPanelVisible() {
+		return values.team_panel_visible;
+	}
+
 	// ── Écriture ──────────────────────────────────────────────────────────────
 
 	/** @return la nouvelle visibilité, persistée. */
@@ -119,5 +141,12 @@ public final class BingoClientConfig {
 		values.hud_visible = !values.hud_visible;
 		save();
 		return values.hud_visible;
+	}
+
+	/** @return la nouvelle visibilité du tableau des équipes, persistée. */
+	public static boolean toggleTeamPanelVisible() {
+		values.team_panel_visible = !values.team_panel_visible;
+		save();
+		return values.team_panel_visible;
 	}
 }

@@ -9,6 +9,7 @@ import com.bingo.mod.network.payload.GameEndPayload;
 import com.bingo.mod.network.payload.ObjectiveProjection;
 import com.bingo.mod.network.payload.ObjectiveSyncPayload;
 import com.bingo.mod.network.payload.PhasePayload;
+import com.bingo.mod.network.payload.PlayerStatsPayload;
 import com.bingo.mod.network.payload.RollStartPayload;
 import com.bingo.mod.network.payload.ScoreUpdatePayload;
 import com.bingo.mod.network.payload.TeamSyncPayload;
@@ -69,9 +70,20 @@ public final class BingoServerNetworking {
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayerEntity player = handler.player;
 			BingoGame game = BingoGame.of(server);
+
+			// Avant tout envoi : c'est ici que le tableau des équipes apprend le nom du joueur, et un
+			// player_stats émis avant l'aurait décrit sous son ancien pseudo — ou pas du tout.
+			if (game.playerPoints().remember(player)) {
+				game.markDirty();
+			}
+
 			sendObjectiveSync(player);
 			sendBoardSync(player, game);
 			sendTeamSync(player, game);
+
+			// À tout le monde et non au seul arrivant : les autres clients ont un nom de plus à
+			// afficher dès qu'il rejoint une équipe.
+			broadcastPlayerStats(game);
 
 			// Garde-fou de `docs/04` §5 : aligner le gel sur la phase à l'entrée en jeu. C'est le
 			// point de nettoyage qui compte réellement — au démarrage du serveur, il n'y a encore
@@ -91,6 +103,7 @@ public final class BingoServerNetworking {
 						sendObjectiveSync(player);
 						sendBoardSync(player, game);
 						sendTeamSync(player, game);
+						sendPlayerStats(player, game);
 					});
 				});
 
@@ -124,6 +137,10 @@ public final class BingoServerNetworking {
 
 	public static void sendTeamSync(ServerPlayerEntity player, BingoGame game) {
 		send(player, BingoNetworking.TEAM_SYNC, buf -> game.teamSync().write(buf));
+	}
+
+	public static void sendPlayerStats(ServerPlayerEntity player, BingoGame game) {
+		send(player, BingoNetworking.PLAYER_STATS, buf -> game.playerStats().write(buf));
 	}
 
 	/** {@code /bingo card} : ouvre l'écran chez l'émetteur seul (`docs/05` §4.2). */
@@ -163,6 +180,17 @@ public final class BingoServerNetworking {
 	public static void broadcastTeamSync(BingoGame game) {
 		TeamSyncPayload payload = game.teamSync();
 		broadcast(game.server(), BingoNetworking.TEAM_SYNC, payload::write);
+	}
+
+	/**
+	 * Noms et totaux individuels — le contenu du tableau des équipes.
+	 *
+	 * <p>Diffusé et non ciblé : le tableau montre <em>tous</em> les joueurs, donc un total qui change
+	 * change l'affichage de chacun.
+	 */
+	public static void broadcastPlayerStats(BingoGame game) {
+		PlayerStatsPayload payload = game.playerStats();
+		broadcast(game.server(), BingoNetworking.PLAYER_STATS, payload::write);
 	}
 
 	public static void broadcastTileUpdate(BingoGame game, TileUpdatePayload payload) {

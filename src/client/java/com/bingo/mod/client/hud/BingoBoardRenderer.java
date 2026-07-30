@@ -95,10 +95,8 @@ public final class BingoBoardRenderer {
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 
-		context.drawNineSlicedTexture(PANEL_TEXTURE,
-				originX, originY,
-				BingoBoardLayout.PANEL_W, BingoBoardLayout.panelHeight(footer),
-				PANEL_CORNER, PANEL_REGION, PANEL_REGION, 0, 0);
+		drawPanel(context, originX, originY,
+				BingoBoardLayout.PANEL_W, BingoBoardLayout.panelHeight(footer));
 
 		renderTitleBar(context, textRenderer, originX, originY);
 
@@ -122,6 +120,19 @@ public final class BingoBoardRenderer {
 
 		RenderSystem.disableBlend();
 		context.getMatrices().pop();
+	}
+
+	/**
+	 * Fond de panneau 9-slice, à n'importe quelle taille.
+	 *
+	 * <p>Exposé pour que le tableau des équipes ({@link BingoTeamPanelRenderer}) partage
+	 * littéralement la texture et ses métriques : deux panneaux du même HUD au cadre légèrement
+	 * différent se verraient immédiatement, et recopier les quatre constantes garantirait qu'un jour
+	 * l'une des deux copies change sans l'autre.
+	 */
+	public static void drawPanel(DrawContext context, int x, int y, int width, int height) {
+		context.drawNineSlicedTexture(PANEL_TEXTURE, x, y, width, height,
+				PANEL_CORNER, PANEL_REGION, PANEL_REGION, 0, 0);
 	}
 
 	// ── Barre de titre ────────────────────────────────────────────────────────

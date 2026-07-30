@@ -8,6 +8,7 @@ import com.bingo.mod.network.payload.BoardSyncPayload;
 import com.bingo.mod.network.payload.GameEndPayload;
 import com.bingo.mod.network.payload.ObjectiveSyncPayload;
 import com.bingo.mod.network.payload.PhasePayload;
+import com.bingo.mod.network.payload.PlayerStatsPayload;
 import com.bingo.mod.network.payload.RollStartPayload;
 import com.bingo.mod.network.payload.ScoreUpdatePayload;
 import com.bingo.mod.network.payload.TeamSyncPayload;
@@ -49,6 +50,7 @@ public final class BingoClientNetworking {
 		receive(BingoNetworking.GAME_END, GameEndPayload::read, BingoClientState::onGameEnd);
 		receive(BingoNetworking.TEAM_SYNC, TeamSyncPayload::read,
 				payload -> BingoClientState.onTeamSync(payload.teams()));
+		receive(BingoNetworking.PLAYER_STATS, PlayerStatsPayload::read, BingoClientState::onPlayerStats);
 		receive(BingoNetworking.ROLL_START, RollStartPayload::read, RollAnimationState::start);
 
 		// Charge utile vide : rien à décoder, mais l'ouverture d'écran doit quand même repasser sur

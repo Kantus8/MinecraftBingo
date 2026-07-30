@@ -13,11 +13,14 @@ import com.bingo.mod.network.payload.GameEndPayload;
 import com.bingo.mod.network.payload.ObjectiveProjection;
 import com.bingo.mod.network.payload.ObjectiveSyncPayload;
 import com.bingo.mod.network.payload.PhasePayload;
+import com.bingo.mod.network.payload.PlayerStatsPayload;
 import com.bingo.mod.network.payload.ScoreUpdatePayload;
 import com.bingo.mod.network.payload.TeamSnapshot;
 import com.bingo.mod.network.payload.TileUpdatePayload;
 import com.bingo.mod.util.BingoConstants;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,6 +57,15 @@ public final class BingoClientState {
 	private static List<Identifier> tiles = List.of();
 	private static final Map<TeamId, TeamSnapshot> teams = new LinkedHashMap<>();
 	private static List<ScoreUpdatePayload.Entry> scores = List.of();
+
+	/**
+	 * Noms et points cumulés, indexés par joueur — la matière du tableau des équipes.
+	 *
+	 * <p>Indexé plutôt que gardé en liste : le tableau parcourt les membres d'une équipe et a besoin
+	 * d'un accès par UUID, pas d'un ordre global.
+	 */
+	private static Map<UUID, PlayerStatsPayload.Entry> playerStats = Map.of();
+
 	private static boolean revealOpponentProgress = true;
 	private static int pointsBase = 100;
 
@@ -193,6 +205,12 @@ public final class BingoClientState {
 		received.forEach(team -> teams.put(team.id(), team));
 	}
 
+	public static void onPlayerStats(PlayerStatsPayload payload) {
+		Map<UUID, PlayerStatsPayload.Entry> received = new LinkedHashMap<>();
+		payload.players().forEach(entry -> received.put(entry.player(), entry));
+		playerStats = Map.copyOf(received);
+	}
+
 	public static void onGameEnd(GameEndPayload payload) {
 		lastEnd = payload;
 		scores = payload.ranking();
@@ -207,6 +225,7 @@ public final class BingoClientState {
 		tiles = List.of();
 		teams.clear();
 		scores = List.of();
+		playerStats = Map.of();
 		lastEnd = null;
 		finishedAtMs = 0L;
 		syncedAtMs = 0L;
@@ -263,9 +282,7 @@ public final class BingoClientState {
 
 	/** L'équipe du joueur local, vide s'il est spectateur. */
 	public static Optional<TeamSnapshot> myTeam() {
-		UUID self = MinecraftClient.getInstance().player == null
-				? null
-				: MinecraftClient.getInstance().player.getUuid();
+		UUID self = self();
 		if (self == null) {
 			return Optional.empty();
 		}
@@ -274,6 +291,41 @@ public final class BingoClientState {
 
 	public static List<ScoreUpdatePayload.Entry> scores() {
 		return scores;
+	}
+
+	/**
+	 * Nom affichable d'un joueur, dans l'ordre de fiabilité décroissante.
+	 *
+	 * <p>Le nom envoyé par le serveur d'abord : c'est le seul qui couvre un membre déconnecté, et un
+	 * membre déconnecté reste dans son équipe (`docs/05` §3). La liste des joueurs du client ensuite,
+	 * pour l'intervalle entre l'arrivée d'un joueur et le {@code player_stats} qui le nomme. Les 8
+	 * premiers caractères de l'UUID en dernier recours : illisible, mais identifiable — et jamais un
+	 * blanc, qui laisserait croire à une ligne vide.
+	 */
+	public static String playerName(UUID player) {
+		PlayerStatsPayload.Entry entry = playerStats.get(player);
+		if (entry != null && !entry.name().isBlank()) {
+			return entry.name();
+		}
+		ClientPlayNetworkHandler handler = MinecraftClient.getInstance().getNetworkHandler();
+		PlayerListEntry listed = handler == null ? null : handler.getPlayerListEntry(player);
+		if (listed != null) {
+			return listed.getProfile().getName();
+		}
+		return player.toString().substring(0, 8);
+	}
+
+	/** Points cumulés d'un joueur, {@code 0} s'il n'a encore rien marqué (`PlayerPoints`). */
+	public static int playerPoints(UUID player) {
+		PlayerStatsPayload.Entry entry = playerStats.get(player);
+		return entry == null ? 0 : entry.points();
+	}
+
+	/** Le joueur local, {@code null} avant l'entrée en monde. */
+	public static @Nullable UUID self() {
+		return MinecraftClient.getInstance().player == null
+				? null
+				: MinecraftClient.getInstance().player.getUuid();
 	}
 
 	public static boolean revealOpponentProgress() {
@@ -395,6 +447,37 @@ public final class BingoClientState {
 			return System.currentTimeMillis() - finishedAtMs < FINISHED_LINGER_MS;
 		}
 		return true;
+	}
+
+	// ── Visibilité du tableau des équipes ──────────────────────────────────────
+
+	/** Bascule du keybind « Afficher/masquer le tableau des équipes », persistée comme celle du HUD. */
+	public static boolean teamPanelVisible() {
+		return BingoClientConfig.teamPanelVisible();
+	}
+
+	public static boolean toggleTeamPanel() {
+		return BingoClientConfig.toggleTeamPanelVisible();
+	}
+
+	/**
+	 * Le tableau des équipes doit-il être dessiné ?
+	 *
+	 * <p>Affiché <strong>en permanence</strong>, contrairement à la grille : ni carte, ni manche en
+	 * cours ne sont requises — c'est précisément dans le salon qu'un joueur veut vérifier qui est avec
+	 * qui. Seules trois choses le masquent : le réglage, {@code F1}, et un écran ouvert.
+	 *
+	 * <p>Le masquage sur écran ouvert n'est pas une omission : Minecraft dessine le HUD <em>sous</em>
+	 * les écrans, donc le laisser visible le ferait chevaucher l'inventaire. {@code BingoBoardScreen}
+	 * le redessine lui-même, exactement comme il redessine la grille — le seul écran où « en
+	 * permanence » doit tenir.
+	 *
+	 * <p>Un tableau sans aucune équipe est tout de même dessiné : « aucune équipe » est une information,
+	 * et un panneau qui apparaît au premier {@code /bingo team create} donnerait l'impression que le mod
+	 * ne tournait pas avant.
+	 */
+	public static boolean shouldRenderTeamPanel(MinecraftClient client) {
+		return teamPanelVisible() && !client.options.hudHidden && client.currentScreen == null;
 	}
 
 	// ── Resynchronisation ─────────────────────────────────────────────────────

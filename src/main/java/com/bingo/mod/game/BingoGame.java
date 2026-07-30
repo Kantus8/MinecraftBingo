@@ -17,6 +17,7 @@ import com.bingo.mod.network.handler.BingoServerNetworking;
 import com.bingo.mod.network.payload.BoardSyncPayload;
 import com.bingo.mod.network.payload.GameEndPayload;
 import com.bingo.mod.network.payload.PhasePayload;
+import com.bingo.mod.network.payload.PlayerStatsPayload;
 import com.bingo.mod.network.payload.ScoreUpdatePayload;
 import com.bingo.mod.network.payload.TeamSnapshot;
 import com.bingo.mod.network.payload.TeamSyncPayload;
@@ -82,6 +83,15 @@ public final class BingoGame {
 
 	// ── État par équipe ───────────────────────────────────────────────────────
 	private final TeamManager teams = new TeamManager();
+
+	/**
+	 * Points individuels, cumulés d'une manche à l'autre.
+	 *
+	 * <p>Hors du {@link TeamManager} exprès : les équipes ne survivent pas à un {@code /bingo reset}
+	 * (`docs/05` §3) alors que ces totaux doivent survivre à tout sauf à {@code /bingo points reset}.
+	 * Les loger dans l'équipe reviendrait à les détruire avec elle.
+	 */
+	private final PlayerPoints playerPoints = new PlayerPoints();
 
 	// ── Chrono (`docs/06` §2) ─────────────────────────────────────────────────
 	private long startedAtMs;
@@ -197,6 +207,10 @@ public final class BingoGame {
 
 	public TeamManager teams() {
 		return teams;
+	}
+
+	public PlayerPoints playerPoints() {
+		return playerPoints;
 	}
 
 	public long rollSeed() {
@@ -655,6 +669,22 @@ public final class BingoGame {
 	 * @return {@code true} si quelque chose a changé
 	 */
 	public boolean applyProgress(BingoTeam team, int index, int newProgress) {
+		return applyProgress(team, index, newProgress, null);
+	}
+
+	/**
+	 * Variante attribuée : la case validée crédite {@code contributor} de ses points individuels.
+	 *
+	 * <p>{@code null} pour les chemins qui n'ont pas d'auteur — réapplication après un rechargement de
+	 * datapack, {@code /bingo debug complete}. Créditer un joueur au hasard de l'équipe serait pire
+	 * qu'un total incomplet : un point attribué à tort ne se voit pas, et ne s'explique pas.
+	 *
+	 * <p>Seule la <em>complétion</em> crédite, jamais l'avancement partiel : sur une case
+	 * « 8 torches » remplie à deux, le dernier item n'a pas plus de mérite que le premier, mais
+	 * fractionner les points d'une case en huit ferait dépendre le total du hasard des paliers.
+	 */
+	public boolean applyProgress(BingoTeam team, int index, int newProgress,
+	                             @Nullable ServerPlayerEntity contributor) {
 		Optional<Objective> found = tile(index);
 		if (found.isEmpty() || team.isCompleted(index)) {
 			return false;
@@ -671,9 +701,12 @@ public final class BingoGame {
 
 		long now = System.currentTimeMillis();
 		int maskBefore = team.completionMask();
+		boolean credited = false;
 		if (completed) {
 			team.complete(index, now);
 			team.rebuildIndex(tiles);
+			credited = contributor != null
+					&& playerPoints.award(contributor, BingoScoring.tileScore(objective, pointsBase()));
 		}
 		int oneAwayCount = WinLines.oneAway(team.completionMask(), winConditions()).size();
 
@@ -681,6 +714,9 @@ public final class BingoGame {
 		BingoServerNetworking.broadcastTileUpdate(this, new TileUpdatePayload(
 				team.id(), index, clamped, completed, completed ? now : 0L));
 		BingoServerNetworking.broadcastScoreUpdate(this);
+		if (credited) {
+			BingoServerNetworking.broadcastPlayerStats(this);
+		}
 
 		if (!completed) {
 			return true;
@@ -936,6 +972,10 @@ public final class BingoGame {
 		return ScoreUpdatePayload.of(ranking());
 	}
 
+	public PlayerStatsPayload playerStats() {
+		return PlayerStatsPayload.of(playerPoints);
+	}
+
 	private List<TeamSnapshot> teamSnapshots() {
 		return teams.all().stream().map(TeamSnapshot::of).toList();
 	}
@@ -962,6 +1002,7 @@ public final class BingoGame {
 		// à la relecture (voir readNbt).
 		nbt.putLong("savedAtMs", System.currentTimeMillis());
 		nbt.put("teams", teams.writeNbt());
+		nbt.put("playerPoints", playerPoints.writeNbt());
 		return nbt;
 	}
 
@@ -986,6 +1027,11 @@ public final class BingoGame {
 				: BingoServerConfig.timeLimitSeconds;
 
 		teams.readNbt(nbt.getList("teams", TeamManager.nbtEntryType()));
+
+		// Avant la relecture des cases, qui peut sortir par la porte de dégradation ci-dessous : les
+		// totaux individuels ne dépendent d'aucun objectif, et un datapack amputé n'a aucune raison de
+		// les faire disparaître.
+		playerPoints.readNbt(nbt.getList("playerPoints", PlayerPoints.nbtEntryType()));
 
 		List<Objective> restored = new ArrayList<>();
 		List<String> missing = new ArrayList<>();

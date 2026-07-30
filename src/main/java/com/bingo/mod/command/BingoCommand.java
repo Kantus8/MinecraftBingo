@@ -9,6 +9,7 @@ import com.bingo.mod.data.Ruleset;
 import com.bingo.mod.data.loader.ObjectiveLoader;
 import com.bingo.mod.game.BingoGame;
 import com.bingo.mod.game.BingoScoring;
+import com.bingo.mod.game.PlayerPoints;
 import com.bingo.mod.game.team.BingoTeam;
 import com.bingo.mod.game.team.TeamId;
 import com.bingo.mod.game.team.TeamManager;
@@ -162,6 +163,7 @@ public final class BingoCommand {
 				.then(CommandManager.literal("score").executes(BingoCommand::score))
 				.then(CommandManager.literal("card").executes(BingoCommand::card))
 				.then(teamNode())
+				.then(pointsNode())
 				.then(CommandManager.literal("start")
 						.requires(operator())
 						.then(CommandManager.argument("difficulty", StringArgumentType.word())
@@ -489,6 +491,77 @@ public final class BingoCommand {
 		source.sendFeedback(() -> Text.translatable("bingo.command.status.teams",
 				game.teams().countStaffed(), game.teams().count()), false);
 		return 1;
+	}
+
+	// ── /bingo points ─────────────────────────────────────────────────────────
+
+	/**
+	 * Totaux individuels cumulés — la contrepartie en commande du tableau des équipes.
+	 *
+	 * <p>{@code reset} est la <strong>seule</strong> façon de remettre ces totaux à zéro : ni
+	 * {@code stop}, ni {@code reroll}, ni {@code reset} de partie n'y touchent, puisque leur intérêt
+	 * est précisément de traverser les manches ({@code PlayerPoints}).
+	 */
+	private static com.mojang.brigadier.builder.LiteralArgumentBuilder<ServerCommandSource> pointsNode() {
+		return CommandManager.literal("points")
+				.executes(BingoCommand::pointsList)
+				.then(CommandManager.literal("list").executes(BingoCommand::pointsList))
+				.then(CommandManager.literal("reset")
+						.requires(operator())
+						.executes(context -> pointsReset(context, Optional.empty()))
+						.then(CommandManager.argument("players", EntityArgumentType.players())
+								.executes(context -> pointsReset(context, Optional.of(
+										EntityArgumentType.getPlayers(context, "players"))))));
+	}
+
+	/** {@code /bingo points [list]} [0] — classement individuel, meilleur total en tête. */
+	private static int pointsList(CommandContext<ServerCommandSource> context) {
+		ServerCommandSource source = context.getSource();
+		BingoGame game = BingoGame.of(source.getServer());
+		List<PlayerPoints.Entry> ranking = game.playerPoints().ranking();
+
+		if (ranking.isEmpty()) {
+			source.sendFeedback(() -> Text.translatable("bingo.command.points.empty")
+					.formatted(Formatting.GRAY), false);
+			return 0;
+		}
+
+		source.sendFeedback(() -> Text.translatable("bingo.command.points.header")
+				.formatted(Formatting.GOLD), false);
+
+		int position = 1;
+		for (PlayerPoints.Entry entry : ranking) {
+			int rank = position++;
+			source.sendFeedback(() -> Text.translatable("bingo.command.points.entry",
+					rank, entry.name(), entry.points()), false);
+		}
+		return ranking.size();
+	}
+
+	/**
+	 * {@code /bingo points reset [players]} [2] — remise à zéro, ciblée ou totale.
+	 *
+	 * <p>Les joueurs restent au tableau avec 0 point plutôt que d'en disparaître : leur ligne est
+	 * attachée à leur équipe, pas à leur total, et les faire disparaître laisserait un membre sans
+	 * points affiché comme membre sans nom.
+	 */
+	private static int pointsReset(CommandContext<ServerCommandSource> context,
+	                               Optional<Collection<ServerPlayerEntity>> players) {
+		ServerCommandSource source = context.getSource();
+		BingoGame game = BingoGame.of(source.getServer());
+
+		int affected = players
+				.map(targets -> (int) targets.stream()
+						.filter(player -> game.playerPoints().reset(player.getUuid()))
+						.count())
+				.orElseGet(() -> game.playerPoints().resetAll());
+
+		game.markDirty();
+		BingoServerNetworking.broadcastPlayerStats(game);
+
+		int count = affected;
+		source.sendFeedback(() -> Text.translatable("bingo.command.points.reset", count), true);
+		return affected;
 	}
 
 	/** {@code /bingo score} [0] — détail par équipe (`docs/05` §4.1). */

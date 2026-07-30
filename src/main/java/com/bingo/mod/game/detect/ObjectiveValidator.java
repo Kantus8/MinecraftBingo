@@ -49,8 +49,15 @@ public final class ObjectiveValidator {
 	private ObjectiveValidator() {
 	}
 
-	/** Résultat des étapes 1 et 2 : la partie et l'équipe du joueur. */
-	private record Context(BingoGame game, BingoTeam team) {
+	/**
+	 * Résultat des étapes 1 et 2 : la partie, l'équipe du joueur, et le joueur lui-même.
+	 *
+	 * <p>Le joueur est retenu jusqu'au bout de la chaîne parce que c'est lui qui sera crédité des
+	 * points individuels de la case ({@link BingoGame#applyProgress}) : le remplacer par son équipe
+	 * dès l'étape 2, comme le faisait la version précédente, rendait l'auteur de la validation
+	 * définitivement irrécupérable en aval.
+	 */
+	private record Context(BingoGame game, BingoTeam team, ServerPlayerEntity player) {
 
 		TeamPendingIndex pending() {
 			return team.pending();
@@ -75,7 +82,7 @@ public final class ObjectiveValidator {
 		if (game == null || !game.phase().areObjectivesValidated() || !game.hasCard()) {
 			return Optional.empty();
 		}
-		return game.teams().of(player.getUuid()).map(team -> new Context(game, team));
+		return game.teams().of(player.getUuid()).map(team -> new Context(game, team, player));
 	}
 
 	// ── CRAFT (`docs/01` §4.1) ────────────────────────────────────────────────
@@ -302,9 +309,14 @@ public final class ObjectiveValidator {
 
 		// Seules les cases FIND reçoivent un incrément (findByItem / findTagged ne rendent que
 		// celles-là), donc un compteur non nul est toujours une case FIND à faire avancer.
+		//
+		// Le crédit des points individuels va au joueur en cours de scan : c'est lui qui porte les
+		// items au moment où la case se coche. Un coffre d'équipe rempli à deux crédite donc celui qui
+		// tient le lot complet — la seule lecture que le scan puisse justifier, puisqu'il ne compte
+		// que des inventaires.
 		for (int index = 0; index < counts.length; index++) {
 			if (counts[index] > 0) {
-				game.applyProgress(team, index, Math.max(team.progress(index), counts[index]));
+				game.applyProgress(team, index, Math.max(team.progress(index), counts[index]), player);
 			}
 		}
 	}
@@ -342,6 +354,7 @@ public final class ObjectiveValidator {
 		if (!context.game().phase().areObjectivesValidated()) {
 			return;
 		}
-		context.game().applyProgress(context.team(), index, context.team().progress(index) + amount);
+		context.game().applyProgress(context.team(), index,
+				context.team().progress(index) + amount, context.player());
 	}
 }

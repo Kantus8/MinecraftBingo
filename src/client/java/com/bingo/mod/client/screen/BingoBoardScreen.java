@@ -3,6 +3,7 @@ package com.bingo.mod.client.screen;
 import com.bingo.mod.client.BingoClientState;
 import com.bingo.mod.client.hud.BingoBoardLayout;
 import com.bingo.mod.client.hud.BingoBoardRenderer;
+import com.bingo.mod.client.hud.BingoTeamPanelRenderer;
 import com.bingo.mod.client.integration.jei.BingoJeiBridge;
 import com.bingo.mod.network.payload.ObjectiveProjection;
 import com.bingo.mod.network.payload.TeamSnapshot;
@@ -89,6 +90,13 @@ public class BingoBoardScreen extends Screen {
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
 		OptionalInt hovered = BingoBoardLayout.hitTest(mouseX, mouseY);
 		BingoBoardRenderer.render(context, textRenderer, hovered.orElse(BingoBoardRenderer.NO_HOVER));
+
+		// Le tableau des équipes est redessiné ici pour la même raison que la grille : l'overlay HUD se
+		// masque dès qu'un écran s'ouvre, et il est censé rester affiché en permanence. Le réglage de
+		// visibilité est respecté — un joueur qui l'a coupé ne doit pas le voir réapparaître ici.
+		if (BingoClientState.teamPanelVisible()) {
+			BingoTeamPanelRenderer.render(context, textRenderer);
+		}
 
 		super.render(context, mouseX, mouseY, delta);
 

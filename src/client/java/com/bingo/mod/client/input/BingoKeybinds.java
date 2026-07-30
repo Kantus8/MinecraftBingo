@@ -24,6 +24,7 @@ public final class BingoKeybinds {
 
 	private static KeyBinding openBoard;
 	private static KeyBinding toggleHud;
+	private static KeyBinding toggleTeamPanel;
 
 	private BingoKeybinds() {
 	}
@@ -41,6 +42,14 @@ public final class BingoKeybinds {
 				InputUtil.UNKNOWN_KEY.getCode(),
 				"key.categories.bingo"));
 
+		// Non assigné par défaut, comme la bascule du HUD et pour la même raison : le tableau des
+		// équipes est fait pour rester affiché, le masquer est un réglage qu'on change une fois.
+		toggleTeamPanel = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+				"key.bingo.toggle_team_panel",
+				InputUtil.Type.KEYSYM,
+				InputUtil.UNKNOWN_KEY.getCode(),
+				"key.categories.bingo"));
+
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			// wasPressed() et non isPressed() : la boucle consomme une pression à la fois, sinon
 			// maintenir la touche rouvrirait l'écran à chaque tick.
@@ -54,6 +63,13 @@ public final class BingoKeybinds {
 				if (client.player != null) {
 					client.player.sendMessage(Text.translatable(BingoConstants.key(
 							visible ? "hud.shown" : "hud.hidden")), true);
+				}
+			}
+			while (toggleTeamPanel.wasPressed()) {
+				boolean visible = BingoClientState.toggleTeamPanel();
+				if (client.player != null) {
+					client.player.sendMessage(Text.translatable(BingoConstants.key(
+							visible ? "hud.teams.shown" : "hud.teams.hidden")), true);
 				}
 			}
 		});
