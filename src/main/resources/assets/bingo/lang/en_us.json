@@ -178,8 +178,6 @@
   "bingo.obj.action.eat_cooked_beef.desc": "Cook some raw beef, then eat it.",
   "bingo.obj.craft.cooked_porkchop": "Cook a Porkchop",
   "bingo.obj.craft.cooked_porkchop.desc": "In a furnace or a smoker.",
-  "bingo.obj.action.ride_horse": "Ride a Horse",
-  "bingo.obj.action.ride_horse.desc": "Tame a horse and hop on its back.",
   "bingo.obj.action.reach_y_0": "Go below Y=0",
   "bingo.obj.action.reach_y_0.desc": "Dive into the Deepslate layer.",
   "bingo.obj.craft.sticks": "Craft 16 Sticks",

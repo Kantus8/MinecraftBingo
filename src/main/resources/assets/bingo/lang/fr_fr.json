@@ -178,8 +178,6 @@
   "bingo.obj.action.eat_cooked_beef.desc": "Faites cuire du bœuf, puis mangez-le.",
   "bingo.obj.craft.cooked_porkchop": "Cuire de la viande de porc",
   "bingo.obj.craft.cooked_porkchop.desc": "Au four ou au fumoir.",
-  "bingo.obj.action.ride_horse": "Monter un cheval",
-  "bingo.obj.action.ride_horse.desc": "Apprivoisez un cheval et montez sur son dos.",
   "bingo.obj.action.reach_y_0": "Descendre sous Y=0",
   "bingo.obj.action.reach_y_0.desc": "Plonger dans la rochabîme (Deepslate).",
   "bingo.obj.craft.sticks": "Fabriquer 16 bâtons",
