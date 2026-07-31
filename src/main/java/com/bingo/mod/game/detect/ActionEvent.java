@@ -83,6 +83,19 @@ public sealed interface ActionEvent {
 		}
 	}
 
+	/**
+	 * Le joueur vient de finir de manger un aliment.
+	 *
+	 * <p>L'item et non la valeur nutritive : un objectif dit « manger de la chair de zombie », pas
+	 * « regagner 4 points de faim ».
+	 */
+	record ItemEaten(Identifier item) implements ActionEvent {
+		@Override
+		public Identifier trigger() {
+			return ActionTriggers.EAT_ITEM;
+		}
+	}
+
 	/** Le joueur a utilisé un item sur un bloc. */
 	record ItemUsedOnBlock(Identifier item, Identifier block) implements ActionEvent {
 		@Override

@@ -2,7 +2,7 @@
   "type": "bingo:death",
   "level": 1,
   "target": {
-    "damage_type": "minecraft:cramming"
+    "damage_type": "minecraft:in_wall"
   },
   "weight": 8,
   "tags": [
@@ -10,12 +10,12 @@
     "bingo:risky"
   ],
   "display": {
-    "icon": "minecraft:slime_ball",
+    "icon": "minecraft:sand",
     "name": {
-      "translate": "bingo.obj.death.cramming"
+      "translate": "bingo.obj.death.suffocation"
     },
     "description": {
-      "translate": "bingo.obj.death.cramming.desc"
+      "translate": "bingo.obj.death.suffocation.desc"
     }
   }
 }

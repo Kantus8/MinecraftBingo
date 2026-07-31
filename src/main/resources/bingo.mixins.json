@@ -6,6 +6,7 @@
   "mixins": [
     "EnchantmentScreenHandlerMixin",
     "ItemStackCraftMixin",
+    "LivingEntityEatFoodMixin",
     "PlayerAdvancementTrackerMixin",
     "TameableEntityMixin",
     "VillagerTradeMixin"

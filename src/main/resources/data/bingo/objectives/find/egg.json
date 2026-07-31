@@ -1,0 +1,20 @@
+{
+  "type": "bingo:find",
+  "level": 1,
+  "target": {
+    "item": "minecraft:egg"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:egg",
+    "name": {
+      "translate": "bingo.obj.find.egg"
+    },
+    "description": {
+      "translate": "bingo.obj.find.egg.desc"
+    }
+  }
+}

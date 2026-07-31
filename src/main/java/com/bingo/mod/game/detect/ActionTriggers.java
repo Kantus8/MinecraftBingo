@@ -3,9 +3,14 @@ package com.bingo.mod.game.detect;
 import com.bingo.mod.objective.Objective;
 import com.bingo.mod.objective.type.ActionTarget;
 import com.bingo.mod.util.BingoConstants;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 
 import java.util.Collection;
@@ -38,6 +43,7 @@ public final class ActionTriggers {
 	public static final Identifier TAME_ANIMAL = BingoConstants.id("tame_animal");
 	public static final Identifier REACH_Y_LEVEL = BingoConstants.id("reach_y_level");
 	public static final Identifier USE_ITEM_ON_BLOCK = BingoConstants.id("use_item_on_block");
+	public static final Identifier EAT_ITEM = BingoConstants.id("eat_item");
 	public static final Identifier REACH_XP_LEVEL = BingoConstants.id("reach_xp_level");
 	public static final Identifier RIDE_EQUIPPED_HORSE = BingoConstants.id("ride_equipped_horse");
 
@@ -108,6 +114,13 @@ public final class ActionTriggers {
 			return matchesId(params, "item", used.item()) && matchesId(params, "block", used.block());
 		});
 
+		// Le seul déclencheur qui accepte un tag en plus d'un identifiant, et il le fallait : « manger
+		// un poisson cuit » vise deux items (cabillaud, saumon) et vanilla n'a pas de tag pour eux.
+		// Aucune clé vaut « n'importe quel aliment ».
+		registry.put(EAT_ITEM, (event, params) -> event instanceof ActionEvent.ItemEaten eaten
+				&& matchesId(params, "item", eaten.item())
+				&& matchesItemTag(params, "tag", eaten.item()));
+
 		// 'level' est exigé, contrairement au joker habituel : un seuil absent voudrait dire
 		// « n'importe quel niveau », donc validation au niveau 0, donc au premier échantillon.
 		registry.put(REACH_XP_LEVEL, (event, params) -> {
@@ -171,6 +184,30 @@ public final class ActionTriggers {
 					key, params.getString(key));
 		}
 		return Optional.ofNullable(parsed);
+	}
+
+	/**
+	 * L'item appartient-il au tag demandé ? Clé absente = pas de contrainte, comme {@link #matchesId}.
+	 *
+	 * <p>Le {@code #} de tête est toléré <em>et</em> optionnel : les cibles {@code item} / {@code tag}
+	 * des autres types passent par {@code TagKey.codec}, qui l'exige, et écrire la même chose des deux
+	 * façons selon l'endroit du JSON serait un piège gratuit.
+	 *
+	 * <p>Un {@code ItemStack} jetable pour interroger l'appartenance : c'est la seule API publique
+	 * simple ({@code ItemStack#isIn}), et cela ne coûte qu'une allocation par repas — pas par tick.
+	 */
+	private static boolean matchesItemTag(NbtCompound params, String key, Identifier eaten) {
+		if (!params.contains(key)) {
+			return true;
+		}
+		String raw = params.getString(key);
+		Identifier tagId = Identifier.tryParse(raw.startsWith("#") ? raw.substring(1) : raw);
+		if (tagId == null) {
+			BingoConstants.LOGGER.warn("Paramètre '{}' de déclencheur illisible : '{}'", key, raw);
+			return false;
+		}
+		TagKey<Item> tag = TagKey.of(RegistryKeys.ITEM, tagId);
+		return new ItemStack(Registries.ITEM.get(eaten)).isIn(tag);
 	}
 
 	/**

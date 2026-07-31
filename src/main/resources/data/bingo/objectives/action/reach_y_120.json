@@ -1,0 +1,24 @@
+{
+  "type": "bingo:action",
+  "level": 1,
+  "target": {
+    "trigger": "bingo:reach_y_level",
+    "params": {
+      "y": 121,
+      "comparator": "above"
+    }
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld"
+  ],
+  "display": {
+    "icon": "minecraft:scaffolding",
+    "name": {
+      "translate": "bingo.obj.action.reach_y_120"
+    },
+    "description": {
+      "translate": "bingo.obj.action.reach_y_120.desc"
+    }
+  }
+}

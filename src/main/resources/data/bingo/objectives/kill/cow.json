@@ -16,6 +16,8 @@
     },
     "description": {
       "translate": "bingo.obj.kill.cow.desc"
-    }
-  }
+    },
+    "icon_count": 3
+  },
+  "count": 3
 }

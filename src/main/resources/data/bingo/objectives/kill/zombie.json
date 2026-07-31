@@ -4,7 +4,6 @@
   "target": {
     "entity_type": "minecraft:zombie"
   },
-  "count": 3,
   "display": {
     "icon": "minecraft:zombie_spawn_egg",
     "name": {
@@ -12,8 +11,7 @@
     },
     "description": {
       "translate": "bingo.obj.kill.zombie.desc"
-    },
-    "icon_count": 3
+    }
   },
   "weight": 10,
   "tags": [

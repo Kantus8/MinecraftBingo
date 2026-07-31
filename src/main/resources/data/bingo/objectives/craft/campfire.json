@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:campfire"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:campfire",
+    "name": {
+      "translate": "bingo.obj.craft.campfire"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.campfire.desc"
+    }
+  }
+}

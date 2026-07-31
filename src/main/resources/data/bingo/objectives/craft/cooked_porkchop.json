@@ -1,0 +1,21 @@
+{
+  "type": "bingo:craft",
+  "level": 1,
+  "target": {
+    "item": "minecraft:cooked_porkchop"
+  },
+  "weight": 10,
+  "tags": [
+    "bingo:overworld",
+    "bingo:crafting"
+  ],
+  "display": {
+    "icon": "minecraft:cooked_porkchop",
+    "name": {
+      "translate": "bingo.obj.craft.cooked_porkchop"
+    },
+    "description": {
+      "translate": "bingo.obj.craft.cooked_porkchop.desc"
+    }
+  }
+}

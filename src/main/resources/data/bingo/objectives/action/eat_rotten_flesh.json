@@ -4,7 +4,7 @@
   "target": {
     "trigger": "bingo:eat_item",
     "params": {
-      "tag": "#bingo:cooked_fishes"
+      "item": "minecraft:rotten_flesh"
     }
   },
   "weight": 10,
@@ -12,12 +12,12 @@
     "bingo:overworld"
   ],
   "display": {
-    "icon": "minecraft:cooked_cod",
+    "icon": "minecraft:rotten_flesh",
     "name": {
-      "translate": "bingo.obj.action.eat_cooked_fish"
+      "translate": "bingo.obj.action.eat_rotten_flesh"
     },
     "description": {
-      "translate": "bingo.obj.action.eat_cooked_fish.desc"
+      "translate": "bingo.obj.action.eat_rotten_flesh.desc"
     }
   }
 }

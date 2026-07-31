@@ -1,6 +1,6 @@
 {
   "type": "bingo:action",
-  "level": 1,
+  "level": 2,
   "target": {
     "trigger": "bingo:use_item_on_block",
     "params": {

@@ -2,15 +2,14 @@
   "type": "bingo:action",
   "level": 1,
   "target": {
-    "trigger": "bingo:advancement",
+    "trigger": "bingo:eat_item",
     "params": {
-      "advancement": "minecraft:husbandry/smelt_style"
+      "item": "minecraft:cooked_beef"
     }
   },
   "weight": 10,
   "tags": [
-    "bingo:overworld",
-    "bingo:experimental"
+    "bingo:overworld"
   ],
   "display": {
     "icon": "minecraft:cooked_beef",

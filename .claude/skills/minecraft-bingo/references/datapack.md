@@ -68,7 +68,7 @@ chez un joueur anglophone.
 | `bingo:find` | `FindTarget` | scan d'inventaire toutes les 10 ticks, 41 emplacements |
 | `bingo:kill_mob` | `KillMobTarget` | `ServerLivingEntityEvents.AFTER_DEATH`, options `require_weapon` / `max_distance` |
 | `bingo:death` | `DeathTarget` | mort du joueur, par `damage_type` ou tag, ou `any_death` |
-| `bingo:action` | `ActionTarget` | déclencheurs de `game/detect/ActionTriggers.java` (dimension, sommeil, altitude, troc, apprivoisement, enchantement…) |
+| `bingo:action` | `ActionTarget` | déclencheurs de `game/detect/ActionTriggers.java` (dimension, sommeil, altitude, niveau d'XP, troc, apprivoisement, enchantement, repas, monture…) |
 
 `item` et `entity` acceptent un identifiant **ou** un tag : voir `objective/condition/ItemMatcher.java`
 et `EntityMatcher.java`, dont les variantes `OfTag` sont traitées à part dans les index inversés (un

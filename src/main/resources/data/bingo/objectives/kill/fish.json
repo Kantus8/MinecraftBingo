@@ -2,7 +2,7 @@
   "type": "bingo:kill_mob",
   "level": 1,
   "target": {
-    "tag": "#minecraft:skeletons"
+    "tag": "#bingo:fishes"
   },
   "weight": 10,
   "tags": [
@@ -10,12 +10,12 @@
     "bingo:combat"
   ],
   "display": {
-    "icon": "minecraft:skeleton_spawn_egg",
+    "icon": "minecraft:cod",
     "name": {
-      "translate": "bingo.obj.kill.skeleton"
+      "translate": "bingo.obj.kill.fish"
     },
     "description": {
-      "translate": "bingo.obj.kill.skeleton.desc"
+      "translate": "bingo.obj.kill.fish.desc"
     }
   }
 }
