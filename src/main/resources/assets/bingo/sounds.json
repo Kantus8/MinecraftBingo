@@ -17,7 +17,7 @@
     "category": "player",
     "subtitle": "subtitles.bingo.bingo",
     "sounds": [
-      { "name": "minecraft:ui.toast.challenge_complete", "type": "event" }
+      { "name": "minecraft:block.beacon.activate", "type": "event" }
     ]
   },
   "ui.countdown_tick": {
@@ -31,7 +31,7 @@
     "category": "player",
     "subtitle": "subtitles.bingo.game_start",
     "sounds": [
-      { "name": "minecraft:block.beacon.activate", "type": "event" }
+      { "name": "minecraft:event.raid.horn", "type": "event" }
     ]
   },
   "ui.game_end": {

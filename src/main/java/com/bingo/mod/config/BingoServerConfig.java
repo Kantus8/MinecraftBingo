@@ -35,7 +35,7 @@ import java.util.function.IntSupplier;
  * <p>Les champs restent {@code public static} : ils sont lus directement par {@code BingoGame}, et
  * les cacher derrière des accesseurs qui ne feraient rien serait du bruit. {@link #settings()} en
  * donne une vue par clé, qui est ce dont {@code /bingo config} a besoin — un {@code switch} sur
- * seize noms de clés dans la commande aurait dupliqué les bornes et les défauts.
+ * dix-sept noms de clés dans la commande aurait dupliqué les bornes et les défauts.
  *
  * <p>Les clés {@code hud_*} de `docs/05` §4.3 n'y figurent pas : elles sont <em>client</em> et
  * vivent dans {@code config/bingo-client.json} (tâche 4.13).
@@ -112,6 +112,15 @@ public final class BingoServerConfig {
 	 * donc un joueur qui l'a déjà ne pourra jamais valider la case ({@code BingoPlayerReset}).
 	 */
 	public static boolean resetAdvancementsOnStart = true;
+
+	/**
+	 * Soin complet au lancement d'une manche : vie, faim, saturation, feu, air, gel.
+	 *
+	 * <p>Le pendant du vidage d'inventaire côté handicap : arriver à deux cœurs et la barre de faim
+	 * vide parce qu'on explorait avant le lancement fausse la manche autant qu'arriver avec un coffre
+	 * d'obsidienne ({@code BingoPlayerReset}).
+	 */
+	public static boolean healOnStart = true;
 
 	/**
 	 * Bornes de la zone de départ tirée par l'option {@code teleport} de {@code /bingo start}, en
@@ -317,10 +326,10 @@ public final class BingoServerConfig {
 	}
 
 	/**
-	 * Les 11 clés serveur de `docs/05` §4.3, dans l'ordre du tableau du doc, suivies des 5 clés
+	 * Les 11 clés serveur de `docs/05` §4.3, dans l'ordre du tableau du doc, suivies des 6 clés
 	 * ajoutées depuis (départ de manche : table rase des joueurs et zone de téléportation).
 	 *
-	 * <p><strong>Écart avec `docs/05` §4.3</strong>, assumé : le doc décrit onze clés. Les cinq
+	 * <p><strong>Écart avec `docs/05` §4.3</strong>, assumé : le doc décrit onze clés. Les six
 	 * dernières viennent de demandes postérieures et sont placées à la fin plutôt qu'insérées dans
 	 * l'ordre alphabétique, pour que la comparaison avec le tableau du doc reste ligne à ligne.
 	 *
@@ -359,6 +368,8 @@ public final class BingoServerConfig {
 				() -> resetLevelsOnStart, value -> resetLevelsOnStart = value));
 		put(settings, new BoolSetting("reset_advancements_on_start", false, true,
 				() -> resetAdvancementsOnStart, value -> resetAdvancementsOnStart = value));
+		put(settings, new BoolSetting("heal_on_start", false, true,
+				() -> healOnStart, value -> healOnStart = value));
 		// Bornes larges mais non nulles : la distance minimale peut valoir 0 (« n'importe où »), la
 		// maximale non — un intervalle [0, 0] ferait atterrir tout le monde sur le spawn.
 		put(settings, new IntSetting("teleport_min_distance", 0, 10_000_000, 1500,

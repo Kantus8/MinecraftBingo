@@ -3,7 +3,9 @@
   "minVersion": "0.8",
   "package": "com.bingo.mod.client.mixin",
   "compatibilityLevel": "JAVA_17",
-  "client": [],
+  "client": [
+    "InGameHudTitleScaleMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

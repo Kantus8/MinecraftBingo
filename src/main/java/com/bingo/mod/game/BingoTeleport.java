@@ -84,6 +84,13 @@ public final class BingoTeleport {
 		}
 
 		BlockPos anchor = zone.get();
+
+		// Spawn du monde déplacé sur la zone, en plus du point de réapparition individuel posé plus
+		// bas. Les deux ne couvrent pas les mêmes cas : le spawn du monde sert aux joueurs qui se
+		// connectent <em>après</em> le lancement, et le point individuel forcé écrase un lit où un
+		// joueur aurait dormi la manche précédente — un lit gagne toujours contre le spawn du monde.
+		world.setSpawnPos(anchor, 0.0f);
+
 		Random random = world.getRandom();
 		for (ServerPlayerEntity player : game.server().getPlayerManager().getPlayerList()) {
 			int x = anchor.getX() + random.nextBetween(-SPREAD, SPREAD);
@@ -104,7 +111,8 @@ public final class BingoTeleport {
 					anchor.getX(), anchor.getZ()).formatted(Formatting.AQUA), false);
 		}
 
-		BingoConstants.LOGGER.info("Zone de départ : {} / {} ({} joueur(s) téléporté(s))",
+		BingoConstants.LOGGER.info(
+				"Zone de départ : {} / {} — spawn du monde déplacé, {} joueur(s) téléporté(s)",
 				anchor.getX(), anchor.getZ(), game.server().getPlayerManager().getCurrentPlayerCount());
 		return zone;
 	}

@@ -4,6 +4,7 @@ import com.bingo.mod.config.BingoServerConfig;
 import com.bingo.mod.util.BingoConstants;
 import net.minecraft.advancement.Advancement;
 import net.minecraft.advancement.PlayerAdvancementTracker;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.AbstractRecipeScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -17,11 +18,11 @@ import java.util.List;
 /**
  * Table rase des joueurs au lancement d'une manche : inventaire, niveaux, succès.
  *
- * <p>Trois remises à zéro plutôt qu'une, chacune derrière sa clé de config
+ * <p>Quatre remises à zéro plutôt qu'une, chacune derrière sa clé de config
  * ({@code clear_inventory_on_start}, {@code reset_levels_on_start},
- * {@code reset_advancements_on_start}) : elles servent la même intention — personne ne démarre avec
- * de l'avance — mais un opérateur peut vouloir vider les sacs sans effacer les succès d'un monde de
- * longue date.
+ * {@code reset_advancements_on_start}, {@code heal_on_start}) : elles servent la même intention —
+ * personne ne démarre avec de l'avance ni avec un handicap — mais un opérateur peut vouloir vider les
+ * sacs sans effacer les succès d'un monde de longue date.
  *
  * <p>Appliqué à <em>tous</em> les joueurs connectés, équipe ou pas : un opérateur qui observe la
  * manche est réinitialisé lui aussi. C'est assumé — épargner certains joueurs demanderait de décider
@@ -35,9 +36,9 @@ public final class BingoPlayerReset {
 	/**
 	 * Applique les remises à zéro activées, et annonce en une seule ligne ce qui a été fait.
 	 *
-	 * <p>Une ligne composée plutôt que trois messages : le lancement de manche envoie déjà
-	 * l'animation de tirage et le décompte, et trois lignes de chat au même instant noieraient
-	 * l'information. Rien n'est envoyé si les trois clés sont à faux.
+	 * <p>Une ligne composée plutôt qu'un message par opération : le lancement de manche envoie déjà
+	 * l'animation de tirage et le décompte, et quatre lignes de chat au même instant noieraient
+	 * l'information. Rien n'est envoyé si les quatre clés sont à faux.
 	 */
 	public static void applyAll(BingoGame game) {
 		List<Text> done = new ArrayList<>();
@@ -49,6 +50,9 @@ public final class BingoPlayerReset {
 		}
 		if (BingoServerConfig.resetAdvancementsOnStart) {
 			done.add(fragment("advancements"));
+		}
+		if (BingoServerConfig.healOnStart) {
+			done.add(fragment("health"));
 		}
 		if (done.isEmpty()) {
 			return;
@@ -67,6 +71,9 @@ public final class BingoPlayerReset {
 			}
 			if (BingoServerConfig.resetAdvancementsOnStart) {
 				revokeAdvancements(game, player);
+			}
+			if (BingoServerConfig.healOnStart) {
+				restoreVitals(player);
 			}
 			player.sendMessage(summary, false);
 			count++;
@@ -134,6 +141,36 @@ public final class BingoPlayerReset {
 	private static void resetExperience(ServerPlayerEntity player) {
 		player.setExperienceLevel(0);
 		player.setExperiencePoints(0);
+	}
+
+	// ── Vitalité ──────────────────────────────────────────────────────────────
+
+	/**
+	 * Rend au joueur un corps intact : vie pleine, faim pleine, et les trois compteurs qui peuvent le
+	 * tuer dans les secondes qui suivent.
+	 *
+	 * <p><strong>Pourquoi le feu, l'air et le gel en plus de la vie</strong> : soigner un joueur qui
+	 * brûle encore, qui est à bout de souffle ou gelé par la neige poudreuse ne le soigne pas — il
+	 * repart à zéro de vie et reperd des points au tick suivant, ce qui se lit comme un soin qui n'a
+	 * pas marché. C'est aussi exactement l'état que vanilla rend à une réapparition.
+	 *
+	 * <p>Saturation à {@code 5} et épuisement à {@code 0}, les valeurs de réapparition vanilla : poser
+	 * la faim à 20 en laissant l'épuisement accumulé ferait redescendre la barre au premier pas.
+	 *
+	 * <p>Les <strong>effets de potion ne sont pas retirés</strong>, faute de l'avoir demandé. À noter
+	 * si un joueur arrive au départ sous Régénération ou Force : ce serait un
+	 * {@code player.clearStatusEffects()} de plus.
+	 */
+	private static void restoreVitals(ServerPlayerEntity player) {
+		player.setHealth(player.getMaxHealth());
+		player.extinguish();
+		player.setAir(player.getMaxAir());
+		player.setFrozenTicks(0);
+
+		HungerManager hunger = player.getHungerManager();
+		hunger.setFoodLevel(20);
+		hunger.setSaturationLevel(5.0f);
+		hunger.setExhaustion(0.0f);
 	}
 
 	// ── Succès ────────────────────────────────────────────────────────────────
