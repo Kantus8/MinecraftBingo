@@ -976,7 +976,7 @@ public final class BingoCommand {
 	 * {@code /bingo debug dump <difficulty> [seed]} [2] — tire une carte d'essai.
 	 *
 	 * <p>Ne touche à aucun état de partie : c'est un banc d'essai du {@link BoardGenerator}, ce qui
-	 * permet de vérifier la distribution sur les 4 profils sans lancer de manche. La graine est
+	 * permet de vérifier la distribution sur les 5 profils sans lancer de manche. La graine est
 	 * exposée pour pouvoir reproduire un tirage à l'identique.
 	 */
 	private static int debugDump(CommandContext<ServerCommandSource> context, long seed) throws CommandSyntaxException {

@@ -70,7 +70,7 @@ Puis `Read` avec `offset`/`limit` sur la seule section utile. Pour trouver un sy
   `BingoModServer` (server), `BingoDataGenerator` (datagen), plus les plugins voicechat et JEI.
 - **Mixins** : `bingo.mixins.json` (5 mixins serveur : craft, avancement, apprivoisement, troc,
   enchantement) et `bingo.client.mixins.json`.
-- **Datapack livré** : `src/main/resources/data/bingo/` — 58 objectifs, 1 pool, 4 difficultés,
+- **Datapack livré** : `src/main/resources/data/bingo/` — 103 objectifs, 1 pool, 5 difficultés,
   1 ruleset.
 
 ## Invariants — les tenir, ne pas les redécouvrir

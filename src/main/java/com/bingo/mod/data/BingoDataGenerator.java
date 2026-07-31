@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
  * ({@link BingoItemTagProvider}), dont la liste vit en constantes {@code Items.*} vérifiées à la
  * compilation dans {@link com.bingo.mod.registry.BingoItemTags}.
  *
- * <p><strong>Ce qui n'est délibérément pas généré</strong> : les 58 objectifs, les 4 profils et les
+ * <p><strong>Ce qui n'est délibérément pas généré</strong> : les 103 objectifs, les 5 profils et les
  * rulesets. Ils sont écrits à la main dans {@code src/main/resources/data/bingo/} et le restent.
  * Chacun porte des données irréductiblement éditoriales — nom et description traduisibles, poids de
  * tirage ajusté, {@code count}, tags de pool, conflits — qu'un provider ne ferait que recopier en

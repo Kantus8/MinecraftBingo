@@ -8,9 +8,9 @@ correspondant.
 
 | Donnée | JSON | Codec / loader |
 |---|---|---|
-| objectif | `data/bingo/objectives/<type>/*.json` (58 livrés) | `objective/Objective.java` + `objective/type/*Target.java` |
+| objectif | `data/bingo/objectives/<type>/*.json` (103 livrés, dont 4 en `bingo:experimental`) | `objective/Objective.java` + `objective/type/*Target.java` |
 | pool | `data/bingo/pools/*.json` | `data/Pool.java`, résolution dans `data/PoolResolver.java` |
-| difficulté | `data/bingo/difficulties/*.json` (4 livrées) | `data/DifficultyProfile.java` |
+| difficulté | `data/bingo/difficulties/*.json` (5 livrées) | `data/DifficultyProfile.java` |
 | ruleset | `data/bingo/rulesets/*.json` (1 livré) | `data/Ruleset.java` |
 | tags d'items | `data/bingo/tags/…`, générés | `data/BingoItemTagProvider.java`, `registry/BingoItemTags.java` |
 
@@ -123,11 +123,12 @@ La cible est **dérivée**, jamais déclarée : `Σ(niveau × compte) / 5`. Les 
 donc une cible posée dans le JSON serait fausse dès que la distribution ne totalise pas cinq fois cette
 cible.
 
-Conséquence : **modifier une `distribution` déplace la difficulté visée.** Les 4 profils livrés visent
-7 / 10 / 13 / 16, soit des totaux de 35 / 50 / 65 / 80.
+Conséquence : **modifier une `distribution` déplace la difficulté visée.** Les 5 profils livrés visent
+5 / 7 / 10 / 13 / 16, soit des totaux de 25 / 35 / 50 / 65 / 80.
 
 | Profil | Distribution | Total | Cible/ligne |
 |---|---|---|---|
+| easiest | 25·N1 | 25 | 5 |
 | easy | 15·N1 10·N2 | 35 | 7 |
 | normal | 8·N1 9·N2 8·N3 | 50 | 10 |
 | hard | 2·N1 10·N2 9·N3 4·N4 | 65 | 13 |

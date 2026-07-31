@@ -68,6 +68,7 @@
   "bingo.obj.action.enter_nether.desc": "Ten obsidian and a flint and steel.",
   "bingo.obj.action.kill_dragon": "Free the End",
   "bingo.obj.action.kill_dragon.desc": "The whole game, on one tile.",
+  "bingo.difficulty.easiest": "Very Easy",
   "bingo.difficulty.easy": "Easy",
   "bingo.difficulty.normal": "Normal",
   "bingo.difficulty.hard": "Hard",

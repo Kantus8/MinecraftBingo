@@ -28,7 +28,7 @@ import java.util.function.IntSupplier;
  *
  * <p><strong>Ces valeurs sont le dernier repli</strong> de la précédence de `docs/01` §8 : le
  * profil de difficulté puis le ruleset les précèdent toujours. Elles ne servent donc qu'aux
- * profils et rulesets qui omettent une clé — ce qui n'arrive pour aucun des 4 profils livrés.
+ * profils et rulesets qui omettent une clé — ce qui n'arrive pour aucun des 5 profils livrés.
  * C'est la raison pour laquelle {@code /bingo config} rappelle le ruleset actif : sans ce rappel,
  * un opérateur qui pose {@code points_base 200} et voit les scores inchangés conclurait à un bug.
  *

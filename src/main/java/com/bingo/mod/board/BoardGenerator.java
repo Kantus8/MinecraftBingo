@@ -59,8 +59,9 @@ public final class BoardGenerator {
 	 * Nombre de dispositions de départ essayées avant d'accepter la meilleure trouvée.
 	 *
 	 * <p>La descente stricte s'arrête au premier optimum local. À 25 cases, repartir d'un brassage
-	 * neuf coûte moins cher qu'une heuristique d'échappement, et les 4 profils livrés tombent dans
-	 * la bande à la première ou à la deuxième tentative.
+	 * neuf coûte moins cher qu'une heuristique d'échappement, et les 5 profils livrés tombent dans
+	 * la bande à la première ou à la deuxième tentative — {@code easiest} n'a même rien à équilibrer,
+	 * 25 cases de niveau 1 donnant 5 par ligne quel que soit le placement.
 	 */
 	private static final int MAX_ARRANGEMENTS = 16;
 

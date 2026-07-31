@@ -68,6 +68,7 @@
   "bingo.obj.action.enter_nether.desc": "Dix blocs d'obsidienne et un briquet.",
   "bingo.obj.action.kill_dragon": "Libérer l'End",
   "bingo.obj.action.kill_dragon.desc": "Le jeu entier, sur une seule case.",
+  "bingo.difficulty.easiest": "Très facile",
   "bingo.difficulty.easy": "Facile",
   "bingo.difficulty.normal": "Normal",
   "bingo.difficulty.hard": "Difficile",
