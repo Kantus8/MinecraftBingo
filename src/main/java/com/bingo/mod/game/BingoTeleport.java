@@ -2,6 +2,9 @@ package com.bingo.mod.game;
 
 import com.bingo.mod.config.BingoServerConfig;
 import com.bingo.mod.util.BingoConstants;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -10,18 +13,20 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * Zone de départ vierge, tirée à chaque {@code /bingo start … teleport} (option de commande).
  *
  * <p><strong>Ce que « encore inexplorée » veut dire ici.</strong> Minecraft ne sait pas répondre à
  * « ce terrain a-t-il déjà été vu ? » : un fichier de région existe dès qu'un joueur a survolé la
- * zone, l'API de lecture des chunks non chargés est asynchrone et privée, et sonder 48 candidats sur
- * disque coûterait plus que le tirage entier. Le mod approxime donc par trois critères qui se
- * vérifient sans toucher au stockage :
+ * zone, et l'API de lecture des chunks non chargés est asynchrone et privée. Le mod approxime donc
+ * par trois critères qui se vérifient sans toucher au stockage :
  * <ul>
  *   <li>à {@code teleport_min_distance} au moins du spawn du monde ;</li>
  *   <li>à {@link #SEPARATION} blocs au moins de toute zone déjà tirée par une manche précédente
@@ -30,12 +35,41 @@ import java.util.Optional;
  *   <li>à {@link #SEPARATION} blocs au moins de la position actuelle de chaque joueur.</li>
  * </ul>
  *
+ * <p><strong>La sélection passe par une recherche de biome</strong>, pas par un tirage de
+ * coordonnées à l'aveugle. {@code ServerWorld#locateBiome} interroge la source de biomes — du bruit
+ * pur — donc elle voit le terrain vierge <em>sans générer un seul chunk</em>, et elle recentre un
+ * point tombé en pleine mer sur la terre la plus proche. Un tirage aléatoire pur, lui, rejetait un
+ * candidat sur trois pour cause d'océan et n'avait aucun moyen de se rattraper.
+ *
+ * <p><strong>Le piège qui rendait la version précédente inopérante</strong>, et qu'il ne faut pas
+ * réintroduire : {@code World#getTopY} <em>ne génère pas</em> le chunk. Pour un chunk non chargé il
+ * rend {@code getBottomY()}, sans le dire. Chaque candidat en terrain vierge — c'est-à-dire tous —
+ * était donc rejeté comme un puits de vide, et la recherche échouait systématiquement. Toute lecture
+ * d'altitude passe désormais par {@link #surfaceAt}, qui charge le chunk et lit son heightmap.
+ *
  * <p><strong>Un seul point d'arrivée pour tout le monde</strong>, à quelques blocs de dispersion
  * près. Éparpiller les équipes serait plus spectaculaire mais fausserait la manche : deux biomes
  * différents ne donnent pas accès aux mêmes objectifs, et le bingo se jouerait au tirage de la
  * destination plutôt qu'à la carte.
+ *
+ * <p>À noter, puisque {@link #relocateAll} déplace aussi le spawn du monde : les distances de la
+ * manche suivante se comptent depuis la <em>zone précédente</em>, pas depuis le spawn d'origine. Les
+ * manches s'éloignent donc en chaîne, ce qui va dans le sens recherché.
  */
 public final class BingoTeleport {
+
+	/**
+	 * Biomes acceptables pour un départ.
+	 *
+	 * <p>Trois exclusions et pas une liste blanche : tout ce qui n'est pas de l'eau libre fait un
+	 * point de départ jouable, et énumérer les biomes terrestres obligerait à maintenir la liste à
+	 * chaque version. Un biome souterrain peut encore passer au travers — la vérification de surface
+	 * de {@link #surfaceAt} est l'arbitre final et rejettera l'océan qui le surplombe.
+	 */
+	private static final Predicate<RegistryEntry<Biome>> HABITABLE = biome ->
+			!biome.isIn(BiomeTags.IS_OCEAN)
+					&& !biome.isIn(BiomeTags.IS_DEEP_OCEAN)
+					&& !biome.isIn(BiomeTags.IS_RIVER);
 
 	/**
 	 * Anneaux successifs, en multiples de la distance configurée.
@@ -47,16 +81,27 @@ public final class BingoTeleport {
 	private static final double[] RINGS = {1.0, 2.0, 4.0};
 
 	/** Tirages d'angle et de distance par anneau. Bon marché : ni chunk ni disque touchés. */
-	private static final int ATTEMPTS_PER_RING = 24;
+	private static final int ATTEMPTS_PER_RING = 12;
 
 	/**
-	 * Candidats dont on résout réellement le sol, par anneau.
+	 * Candidats dont on charge réellement le chunk, par anneau.
 	 *
-	 * <p>{@code getTopY} <strong>génère</strong> le chunk s'il n'existe pas — c'est le seul travail
-	 * lourd de la sélection, et le plafonner est ce qui empêche un monde à mer infinie de figer le
-	 * serveur pendant 72 générations de chunk.
+	 * <p>C'est le seul travail lourd de la sélection, et le plafonner est ce qui empêche un monde
+	 * hostile de figer le serveur le temps de générer trois douzaines de chunks. Le plafond est bas
+	 * parce que la recherche de biome a déjà écarté l'eau : un sondage échoue rarement.
 	 */
-	private static final int SURFACE_PROBES_PER_RING = 6;
+	private static final int SURFACE_PROBES_PER_RING = 4;
+
+	/**
+	 * Rayon de recherche autour du point tiré, et pas de balayage.
+	 *
+	 * <p>2 km suffisent à retomber sur la terre ferme depuis presque n'importe quel point d'un océan,
+	 * et le pas de 64 blocs correspond à la résolution utile de la source de biomes — plus fin ne
+	 * trouverait rien de plus et multiplierait les échantillons.
+	 */
+	private static final int BIOME_SEARCH_RADIUS = 2048;
+	private static final int BIOME_HORIZONTAL_STEP = 64;
+	private static final int BIOME_VERTICAL_STEP = 64;
 
 	/** Rayon de « déjà vu » autour d'une zone tirée ou d'un joueur, en blocs. */
 	private static final int SEPARATION = 512;
@@ -78,7 +123,8 @@ public final class BingoTeleport {
 		Optional<BlockPos> zone = pickZone(world, avoided);
 		if (zone.isEmpty()) {
 			BingoConstants.LOGGER.warn(
-					"Aucune zone de départ trouvée entre {} et {} blocs du spawn — téléportation ignorée",
+					"Aucune zone de départ trouvée entre {} et {} blocs du spawn (×4 au plus large) —"
+							+ " téléportation ignorée",
 					BingoServerConfig.teleportMinDistance, BingoServerConfig.teleportMaxDistance);
 			return Optional.empty();
 		}
@@ -95,13 +141,17 @@ public final class BingoTeleport {
 		for (ServerPlayerEntity player : game.server().getPlayerManager().getPlayerList()) {
 			int x = anchor.getX() + random.nextBetween(-SPREAD, SPREAD);
 			int z = anchor.getZ() + random.nextBetween(-SPREAD, SPREAD);
-			int y = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z);
+
+			// Repli sur l'ancre elle-même : la dispersion peut franchir la limite du chunk, et le
+			// voisin peut tomber dans l'eau. Mieux vaut deux joueurs au même bloc qu'un joueur à l'eau.
+			BlockPos landing = surfaceAt(world, x, z).orElse(anchor);
 
 			// Chute et vitesse remises à zéro : un joueur téléporté en pleine chute garde sa
 			// fallDistance et meurt à l'atterrissage, ce qui est une drôle de façon de commencer.
 			player.fallDistance = 0.0f;
 			player.setVelocity(Vec3d.ZERO);
-			player.teleport(world, x + 0.5, y, z + 0.5, player.getYaw(), player.getPitch());
+			player.teleport(world, landing.getX() + 0.5, landing.getY(), landing.getZ() + 0.5,
+					player.getYaw(), player.getPitch());
 
 			// Sans ce point de réapparition, la première mort renverrait le joueur au spawn du monde,
 			// à plusieurs kilomètres : la téléportation serait annulée par le premier zombie.
@@ -123,7 +173,7 @@ public final class BingoTeleport {
 			if (found.isPresent()) {
 				return found;
 			}
-			BingoConstants.LOGGER.debug("Anneau ×{} saturé — élargissement", ring);
+			BingoConstants.LOGGER.debug("Anneau ×{} sans zone exploitable — élargissement", ring);
 		}
 		return Optional.empty();
 	}
@@ -143,45 +193,85 @@ public final class BingoTeleport {
 			double distance = min + random.nextDouble() * (max - min);
 			int x = spawn.getX() + (int) Math.round(Math.cos(angle) * distance);
 			int z = spawn.getZ() + (int) Math.round(Math.sin(angle) * distance);
-
-			// Tests bon marché d'abord, génération de chunk ensuite : l'ordre est ce qui rend 24 essais
-			// par anneau acceptables.
-			BlockPos flat = new BlockPos(x, spawn.getY(), z);
-			if (!world.getWorldBorder().contains(flat)) {
+			if (!isAcceptable(world, spawn, x, z, min, avoided)) {
 				continue;
 			}
-			if (tooClose(x, z, avoided)) {
+
+			// Aucun chunk généré ici : la recherche travaille sur le bruit de la source de biomes.
+			Pair<BlockPos, RegistryEntry<Biome>> located = world.locateBiome(
+					HABITABLE, new BlockPos(x, world.getSeaLevel(), z),
+					BIOME_SEARCH_RADIUS, BIOME_HORIZONTAL_STEP, BIOME_VERTICAL_STEP);
+			if (located == null) {
+				continue;
+			}
+
+			// Revalidé après recentrage : la recherche peut ramener un point à deux kilomètres de là,
+			// donc éventuellement trop près du spawn, d'un joueur ou d'une zone déjà jouée.
+			BlockPos land = located.getFirst();
+			if (!isAcceptable(world, spawn, land.getX(), land.getZ(), min, avoided)) {
 				continue;
 			}
 
 			probes++;
-			BlockPos candidate = new BlockPos(x, world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z), z);
-			if (candidate.getY() <= world.getBottomY() + 1) {
-				continue;
+			Optional<BlockPos> surface = surfaceAt(world, land.getX(), land.getZ());
+			if (surface.isPresent()) {
+				BingoConstants.LOGGER.debug("Zone retenue dans le biome {} après {} essai(s)",
+						biomeName(located.getSecond()), attempt + 1);
+				return surface;
 			}
-			// Le heightmap MOTION_BLOCKING compte les fluides : au-dessus d'un océan ou d'un lac de lave
-			// il rend la surface du liquide, et y déposer une équipe entière serait un noyade collective.
-			if (!world.getFluidState(candidate.down()).isEmpty()) {
-				continue;
-			}
-			return Optional.of(candidate);
 		}
 		return Optional.empty();
 	}
 
-	/**
-	 * Distance horizontale seule, et en {@code long} : un monde va à ±30 000 000 blocs, où le carré
-	 * d'un écart dépasse la capacité d'un {@code int}.
-	 */
-	private static boolean tooClose(int x, int z, List<BlockPos> avoided) {
-		long limit = (long) SEPARATION * SEPARATION;
-		for (BlockPos other : avoided) {
-			long dx = x - (long) other.getX();
-			long dz = z - (long) other.getZ();
-			if (dx * dx + dz * dz < limit) {
-				return true;
-			}
+	/** Border, distance minimale au spawn, et éloignement de tout ce qui est déjà connu. */
+	private static boolean isAcceptable(ServerWorld world, BlockPos spawn, int x, int z,
+	                                   double minDistance, List<BlockPos> avoided) {
+		if (!world.getWorldBorder().contains(new BlockPos(x, spawn.getY(), z))) {
+			return false;
 		}
-		return false;
+		if (distanceSq(x, z, spawn.getX(), spawn.getZ()) < minDistance * minDistance) {
+			return false;
+		}
+		return avoided.stream().noneMatch(other ->
+				distanceSq(x, z, other.getX(), other.getZ()) < (double) SEPARATION * SEPARATION);
+	}
+
+	/**
+	 * Altitude du sol en {@code x, z}, chunk généré au besoin.
+	 *
+	 * <p><strong>Ne pas remplacer par {@code world.getTopY(...)}</strong> : celui-ci teste
+	 * {@code isChunkLoaded} et rend {@code getBottomY()} quand le chunk est absent, silencieusement.
+	 * En terrain vierge — le cas normal ici — il rend donc toujours le fond du monde, ce qui faisait
+	 * échouer 100 % des recherches. Lire le heightmap du chunk une fois chargé est la seule forme qui
+	 * dise la vérité.
+	 *
+	 * @return vide si la colonne est vide (puits de vide) ou si le sol est un fluide — océan, lac,
+	 *         lave. Le heightmap {@code MOTION_BLOCKING} compte les fluides : sans ce test, une équipe
+	 *         entière atterrirait à la surface de l'eau.
+	 */
+	private static Optional<BlockPos> surfaceAt(ServerWorld world, int x, int z) {
+		WorldChunk chunk = world.getChunk(x >> 4, z >> 4);
+		int y = chunk.sampleHeightmap(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z) + 1;
+		if (y <= world.getBottomY() + 1) {
+			return Optional.empty();
+		}
+		BlockPos pos = new BlockPos(x, y, z);
+		return chunk.getBlockState(pos.down()).getFluidState().isEmpty()
+				? Optional.of(pos)
+				: Optional.empty();
+	}
+
+	private static String biomeName(RegistryEntry<Biome> biome) {
+		return biome.getKey().map(key -> key.getValue().toString()).orElse("?");
+	}
+
+	/**
+	 * Distance horizontale au carré, en {@code double} : un monde va à ±30 000 000 blocs, où le carré
+	 * d'un écart déborde largement un {@code int}.
+	 */
+	private static double distanceSq(int x, int z, int otherX, int otherZ) {
+		double dx = (double) x - otherX;
+		double dz = (double) z - otherZ;
+		return dx * dx + dz * dz;
 	}
 }

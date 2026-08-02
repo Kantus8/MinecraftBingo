@@ -404,6 +404,17 @@ public final class BingoCommand {
 		return Optional.of(resolveDataId(StringArgumentType.getString(context, "ruleset")));
 	}
 
+	/**
+	 * La difficulté brute de {@code /bingo debug solo}, non résolue en identifiant.
+	 *
+	 * <p>Contrairement à {@link #rulesetArgument}, la résolution est laissée à {@code debugSolo} : il
+	 * applique d'abord son défaut ({@code normal}) quand l'argument est absent, et résoudre ici
+	 * obligerait à dupliquer ce défaut au niveau de l'arbre.
+	 */
+	private static Optional<String> soloDifficultyArgument(CommandContext<ServerCommandSource> context) {
+		return Optional.of(StringArgumentType.getString(context, "difficulty"));
+	}
+
 	private static int start(CommandContext<ServerCommandSource> context, Optional<Identifier> ruleset,
 	                        boolean teleport) throws CommandSyntaxException {
 		ServerCommandSource source = context.getSource();
@@ -806,12 +817,17 @@ public final class BingoCommand {
 								.then(CommandManager.argument("index",
 												IntegerArgumentType.integer(0, BingoBoard.TILE_COUNT - 1))
 										.executes(context -> debugTile(context, false)))))
+				// Même option 'teleport' que /bingo start, et opt-in pour la même raison qu'elle y est
+				// une option : un test solo se fait le plus souvent sur place, au milieu du chantier.
 				.then(CommandManager.literal("solo")
-						.executes(context -> debugSolo(context, Optional.empty()))
+						.executes(context -> debugSolo(context, Optional.empty(), false))
+						.then(CommandManager.literal(TELEPORT_OPTION)
+								.executes(context -> debugSolo(context, Optional.empty(), true)))
 						.then(CommandManager.argument("difficulty", StringArgumentType.word())
 								.suggests(DIFFICULTY_SUGGESTIONS)
-								.executes(context -> debugSolo(context,
-										Optional.of(StringArgumentType.getString(context, "difficulty"))))))
+								.executes(context -> debugSolo(context, soloDifficultyArgument(context), false))
+								.then(CommandManager.literal(TELEPORT_OPTION)
+										.executes(context -> debugSolo(context, soloDifficultyArgument(context), true)))))
 				.then(CommandManager.literal("state").executes(BingoCommand::debugState));
 	}
 
@@ -822,7 +838,8 @@ public final class BingoCommand {
 	private static final TeamId SOLO_OPPONENT = new TeamId("blue");
 
 	/**
-	 * {@code /bingo debug solo [difficulty]} [2] — monte une manche jouable à un seul joueur.
+	 * {@code /bingo debug solo [difficulty] [teleport]} [2] — monte une manche jouable à un seul
+	 * joueur.
 	 *
 	 * <p>La recette du lot 2 demande 4 joueurs et 2 équipes, ce qui rend la boucle de jeu
 	 * intestable pour un développeur seul : {@code /bingo start} refuse de démarrer sous deux
@@ -839,8 +856,14 @@ public final class BingoCommand {
 	 *
 	 * <p>Rejouable telle quelle, y compris en pleine manche : elle commence par un
 	 * {@link BingoGame#reset()}.
+	 *
+	 * <p>L'option {@code teleport} est la même que celle de {@code /bingo start}, et reste optionnelle
+	 * ici aussi : un test solo se fait le plus souvent sur place. Elle existe parce que c'est le seul
+	 * chemin qui permette d'éprouver la recherche de zone à un joueur — {@code /bingo start} exige
+	 * deux équipes pourvues.
 	 */
-	private static int debugSolo(CommandContext<ServerCommandSource> context, Optional<String> difficultyArgument)
+	private static int debugSolo(CommandContext<ServerCommandSource> context,
+	                            Optional<String> difficultyArgument, boolean teleport)
 			throws CommandSyntaxException {
 		ServerCommandSource source = context.getSource();
 		ServerPlayerEntity player = source.getPlayerOrThrow();
@@ -853,10 +876,8 @@ public final class BingoCommand {
 		game.teams().join(player.getUuid(), SOLO_TEAM, game.teamSize());
 		afterTeamChange(game);
 
-		// Sans téléportation : le test solo sert à voir la boucle de jeu, pas à se retrouver à trois
-		// kilomètres du chantier où l'on développe.
 		BingoGame.StartReport report = game.start(difficulty, Optional.empty(),
-				new BingoGame.StartOptions(true, false));
+				new BingoGame.StartOptions(true, teleport));
 		switch (report.result()) {
 			case WRONG_PHASE -> throw WRONG_PHASE.create(game.phase().name());
 			case UNKNOWN_DIFFICULTY -> throw UNKNOWN_DIFFICULTY.create(difficulty.toString());
@@ -868,6 +889,9 @@ public final class BingoCommand {
 						difficultyName(difficulty), mine.coloredName()).formatted(Formatting.GREEN), true);
 				source.sendFeedback(() -> Text.translatable("bingo.command.debug.solo.hint",
 						SOLO_OPPONENT.value(), BingoBoard.TILE_COUNT - 1).formatted(Formatting.GRAY), false);
+				if (teleport) {
+					reportTeleport(source, report.teleportZone());
+				}
 				reportWarnings(source, report.warnings());
 			}
 		}
