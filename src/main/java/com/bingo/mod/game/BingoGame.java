@@ -420,6 +420,11 @@ public final class BingoGame {
 		// n'envoie qu'un message récapitulatif au lieu d'un par remise à zéro.
 		BingoPlayerReset.applyAll(this);
 
+		// Avant la téléportation : un joueur déplacé de nuit voit d'abord des mobs, et le recalage de
+		// l'heure serait alors visible comme un saut de lumière à l'arrivée. Appliqué même sans
+		// l'option teleport — une manche sur place mérite la même journée pleine.
+		BingoWorldRules.resetTimeOfDay(this);
+
 		if (!options.teleport()) {
 			return report;
 		}
@@ -502,6 +507,10 @@ public final class BingoGame {
 				.filter(team -> !team.isEmpty() && team.size() < teamSize())
 				.forEach(team -> warnings.add("Équipe '" + team.id() + "' incomplète : "
 						+ team.size() + "/" + teamSize() + " joueur(s)"));
+
+		// Après le point de non-retour du tirage, et pas dans start() : un tirage refusé faute
+		// d'objectifs ne doit rien changer au monde, pas même une règle de jeu.
+		BingoWorldRules.keepInventory(this);
 
 		if (phase == GamePhase.ROLLING) {
 			// Reroll pendant le tirage : la phase ne change pas, mais l'animation doit repartir de
@@ -629,7 +638,9 @@ public final class BingoGame {
 			BingoAnnouncer.gameStarted(this);
 		}
 
-		// Gel : un seul appel couvre l'entrée dans ROLLING comme toutes les sorties (`docs/04` §5).
+		// Attente (immobilisation + aveuglement) : un seul appel couvre l'entrée dans ROLLING, le
+		// passage en COUNTDOWN qui la prolonge, et toutes les sorties (`docs/04` §5). Après le calcul
+		// de phaseDeadlineMs ci-dessus, dont BingoFreeze déduit la durée des effets.
 		BingoFreeze.apply(this);
 
 		// Le burst de fin d'animation est calé sur la sortie de ROLLING et non sur un minuteur
@@ -666,7 +677,12 @@ public final class BingoGame {
 		return ticks * 50L;
 	}
 
-	private int countdownSeconds() {
+	/**
+	 * {@code ruleset.countdown_seconds}. Publique parce que {@link BingoFreeze} en a besoin dès
+	 * l'entrée dans {@code ROLLING} : l'attente qu'il pose couvre le tirage <em>et</em> le décompte,
+	 * dont l'échéance n'existe pas encore à cet instant.
+	 */
+	public int countdownSeconds() {
 		return ruleset().map(rules -> rules.timings().countdownSeconds())
 				.orElse(BingoServerConfig.countdownSeconds);
 	}

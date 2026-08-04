@@ -8,6 +8,7 @@ import com.bingo.mod.util.BingoConstants;
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -30,6 +31,26 @@ import java.util.function.Consumer;
  */
 public final class BingoAnnouncer {
 
+	/**
+	 * Volume du cor de départ, repris tel quel de {@code Raid#playRaidHorn}.
+	 *
+	 * <p>Les quatre variantes de {@code event.raid.horn} sont authorées à {@code "volume": 0.01} dans
+	 * le {@code sounds.json} vanilla : ce cor est fait pour être diffusé à l'échelle d'un raid, pas
+	 * joué à l'oreille d'un joueur. Le gain effectif étant le produit du volume d'émission et de celui
+	 * du fichier, un appel à {@code 1.0f} — la valeur évidente, et celle qu'utilisent tous les autres
+	 * sons d'ici — donne 1 % de gain, donc un silence. Vanilla compense avec {@code 64.0f} ;
+	 * {@code 96.0f} est ce chiffre majoré de 50 %, soit un gain de 0,96.
+	 *
+	 * <p><strong>C'est à peu près le plafond utile</strong> : le client borne le gain à 1,0
+	 * ({@code SoundSystem#getAdjustedVolume}), donc au-delà de {@code 100.0f} la valeur est absorbée
+	 * sans rien changer. Pour un cor plus présent, il faudrait un autre son, pas un autre nombre.
+	 *
+	 * <p>Ce volume ne suffit que parce que {@link BingoSounds#GAME_START} référence l'événement vanilla
+	 * sans passer par un alias {@code sounds.json} — lequel aurait élevé le 0,01 au carré. Voir le
+	 * javadoc de cette constante avant de toucher à l'un des deux.
+	 */
+	private static final float RAID_HORN_VOLUME = 96.0f;
+
 	private BingoAnnouncer() {
 	}
 
@@ -41,7 +62,7 @@ public final class BingoAnnouncer {
 		forEachPlayer(game, player -> {
 			player.networkHandler.sendPacket(new TitleS2CPacket(title));
 			player.networkHandler.sendPacket(new SubtitleS2CPacket(Text.empty()));
-			play(player, BingoSounds.GAME_START, 1.0f);
+			play(player, BingoSounds.GAME_START, RAID_HORN_VOLUME);
 		});
 		broadcast(game, title);
 	}
@@ -131,12 +152,31 @@ public final class BingoAnnouncer {
 		forEachPlayer(game, player -> {
 			player.networkHandler.sendPacket(new TitleS2CPacket(headline));
 			player.networkHandler.sendPacket(new SubtitleS2CPacket(reason));
-			play(player, victory ? BingoSounds.BINGO : BingoSounds.GAME_END, 1.0f);
+			play(player, endSound(game, payload, player), 1.0f);
 		});
 
 		broadcast(game, headline);
 		broadcast(game, reason);
 		announceRanking(game, payload.ranking());
+	}
+
+	/**
+	 * Le son de fin dépend du joueur, pas de la manche.
+	 *
+	 * <p>Le titre plein écran annonce le vainqueur, ce qui laisse chacun déduire son propre sort en
+	 * lisant un nom d'équipe. Le son, lui, le dit immédiatement — c'est la raison d'être de cette
+	 * méthode.
+	 *
+	 * <p>Deux cas seulement, et l'égalité tombe dans le second sans test dédié : une liste de
+	 * vainqueurs vide ne contient l'équipe de personne. Un joueur sans équipe — spectateur, arrivé en
+	 * cours de manche — y tombe aussi, ce qui est correct : il n'a pas gagné.
+	 */
+	private static SoundEvent endSound(BingoGame game, com.bingo.mod.network.payload.GameEndPayload payload,
+			ServerPlayerEntity player) {
+		return game.teams().of(player.getUuid())
+				.filter(team -> payload.winners().contains(team.id()))
+				.map(team -> BingoSounds.BINGO)
+				.orElse(BingoSounds.GAME_END);
 	}
 
 	/** Classement complet en chat — la fin par temps écoulé n'a de sens qu'avec les scores. */
@@ -200,11 +240,19 @@ public final class BingoAnnouncer {
 	/**
 	 * Son privé, entendu du seul destinataire.
 	 *
-	 * <p>{@code ServerPlayerEntity#playSound} est surchargé pour n'envoyer le paquet qu'à ce
-	 * joueur — à la différence de {@code World#playSound}, qui le diffuse aux joueurs proches et
-	 * ferait fuiter le son de « 4/5 » vers l'équipe adverse.
+	 * <p><strong>La surcharge à quatre arguments n'est pas décorative.</strong>
+	 * {@code ServerPlayerEntity} ne redéfinit que celle-ci, qui envoie un {@code PlaySoundS2CPacket}
+	 * au seul {@code networkHandler} du joueur. La forme à trois arguments — la plus courte, donc la
+	 * tentante — n'est pas redéfinie : elle tombe sur {@code Entity#playSound}, qui appelle
+	 * {@code getWorld().playSound(null, …)} et <em>diffuse à tous les joueurs proches</em>. Passer par
+	 * elle ferait fuiter le son de « 4/5 » vers l'équipe adverse, exactement ce que cette classe
+	 * cherche à éviter, et ferait entendre à chacun autant de copies du son qu'il y a de joueurs
+	 * autour.
+	 *
+	 * <p>{@code PLAYERS} reproduit ce que {@code PlayerEntity#getSoundCategory} renvoyait par l'ancien
+	 * chemin : le joueur garde la main via son curseur de volume.
 	 */
 	private static void play(ServerPlayerEntity player, SoundEvent sound, float volume, float pitch) {
-		player.playSound(sound, volume, pitch);
+		player.playSound(sound, SoundCategory.PLAYERS, volume, pitch);
 	}
 }

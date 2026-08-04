@@ -76,7 +76,7 @@ public final class RollAnimationState {
 	 * Un événement de la timeline, joué une fois quand {@code elapsed} le dépasse.
 	 *
 	 * @param finale marque le seul événement qui fait autre chose que du son : la gerbe d'étincelles
-	 *               du HUD, qui doit partir au même instant que {@code challenge_complete}
+	 *               du HUD, qui doit partir au même instant que le son de clôture du tirage
 	 */
 	private record Cue(float atMs, SoundEvent sound, float pitch, float volume, boolean finale) {
 
@@ -216,7 +216,19 @@ public final class RollAnimationState {
 					LOCK_PITCHES[row],
 					row == LOCK_TIMES_MS.length - 1 ? 0.8f : 0.7f));
 		}
-		built.add(new Cue(durationMs, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 1.0f, 1.0f, true));
+		// Écart avec `docs/04` §2.3, qui prévoit ici `ui.toast.challenge_complete` : ce son est
+		// désormais celui de la victoire (BingoSounds.BINGO), et le réutiliser pour clore le tirage
+		// annoncerait deux fois par manche un événement de nature différente. Le totem se lit comme
+		// un basculement — la carte est verrouillée, la manche commence — et non comme une récompense.
+		//
+		// Second écart, sur le volume que `docs/04` §2.1 fixait à 1.0 : le totem est authoré à 1.0 et
+		// c'est un son conçu pour percer un combat, pas pour clore une animation d'interface. À plein
+		// volume il écrase les 5 clicks de verrouillage qui le précèdent. 0.2 le ramène sous les 0,6
+		// du succès rare qu'il remplace — la clôture reste nette parce qu'elle arrive après un silence,
+		// pas parce qu'elle est forte.
+		//
+		// L'ordre du record est (pitch, volume) : c'est le second nombre qu'on baisse ici, pas le premier.
+		built.add(new Cue(durationMs, SoundEvents.ITEM_TOTEM_USE, 1.0f, 0.2f, true));
 
 		built.sort((left, right) -> Float.compare(left.atMs(), right.atMs()));
 		return List.copyOf(built);

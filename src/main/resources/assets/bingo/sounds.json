@@ -13,25 +13,11 @@
       { "name": "minecraft:block.note_block.chime", "type": "event" }
     ]
   },
-  "ui.bingo": {
-    "category": "player",
-    "subtitle": "subtitles.bingo.bingo",
-    "sounds": [
-      { "name": "minecraft:block.beacon.activate", "type": "event" }
-    ]
-  },
   "ui.countdown_tick": {
     "category": "player",
     "subtitle": "subtitles.bingo.countdown_tick",
     "sounds": [
       { "name": "minecraft:block.note_block.hat", "type": "event" }
-    ]
-  },
-  "ui.game_start": {
-    "category": "player",
-    "subtitle": "subtitles.bingo.game_start",
-    "sounds": [
-      { "name": "minecraft:event.raid.horn", "type": "event" }
     ]
   },
   "ui.game_end": {
